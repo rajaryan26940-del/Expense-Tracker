@@ -25,9 +25,9 @@ res.status(201).json({
 // Get All Expenses
 const getExpenses = async (req, res) => {
   try {
-  const expenses = await Expense.find({
-    user: req.user._id,
-  });
+ const expenses = await Expense.find({
+  user: req.user._id,
+}).sort({ createdAt: -1 });
   res.status(200).json({
   expenses,
 });
