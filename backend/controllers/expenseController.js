@@ -65,8 +65,42 @@ res.status(200).json({
     });
   }
 };
+// Update Expense
+const updateExpense = async (req, res) => {
+  try {
+  const expenseId = req.params.id;
+
+  const { title, amount, category } = req.body;
+  const expense = await Expense.findById(expenseId);
+  if (!expense) {
+  return res.status(404).json({
+    message: "Expense not found",
+  });
+}
+if (expense.user.toString() !== req.user._id.toString()) {
+  return res.status(401).json({
+    message: "Unauthorized",
+  });
+}
+expense.title = title;
+expense.amount = amount;
+expense.category = category;
+await expense.save();
+res.status(200).json({
+  message: "Expense updated successfully",
+  expense,
+});
+}catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
 module.exports = {
   addExpense,
   getExpenses,
   deleteExpense,
+  updateExpense,
 };
