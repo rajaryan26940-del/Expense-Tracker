@@ -1,14 +1,27 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import { registerUser } from "../services/authService";
 
 function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  function handleRegister() {
-  alert(
-    `Name: ${name}\nEmail: ${email}\nPassword: ${password}`
-  );
+  const navigate = useNavigate();
+  async function handleRegister() {
+  try {
+  const data = await registerUser({
+    name,
+    email,
+    password,
+  });
+
+  alert("Registration Successful");
+  navigate("/");
+} catch (error) {
+  console.log(error);
+  alert(error.response?.data?.message || "Registration Failed");
+}
 }
 
   return (
