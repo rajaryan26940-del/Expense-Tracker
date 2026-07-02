@@ -8,6 +8,7 @@ console.log("PORT:", process.env.PORT);
 
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
+const expenseRoutes = require("./routes/expenseRoutes");
 
 connectDB();
 
@@ -15,6 +16,7 @@ const app = express();
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use("/api/expense", expenseRoutes);
 
 const PORT = process.env.PORT || 5000;
 
