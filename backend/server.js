@@ -16,7 +16,7 @@ const app = express();
 
 app.use(express.json());
 app.use("/api/auth", authRoutes);
-app.use("/api/expense", expenseRoutes);
+app.use("/api/expenses", expenseRoutes);
 
 const PORT = process.env.PORT || 5000;
 

@@ -22,4 +22,24 @@ res.status(201).json({
     });
   }
 };
-module.exports = { addExpense };
+// Get All Expenses
+const getExpenses = async (req, res) => {
+  try {
+  const expenses = await Expense.find({
+    user: req.user._id,
+  });
+  res.status(200).json({
+  expenses,
+});
+} catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+module.exports = {
+  addExpense,
+  getExpenses,
+};
