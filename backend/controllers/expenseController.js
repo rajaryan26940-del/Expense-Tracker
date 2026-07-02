@@ -39,7 +39,34 @@ const getExpenses = async (req, res) => {
     });
   }
 };
+const deleteExpense = async (req, res) => {
+  try {
+  const expenseId = req.params.id;
+  const expense = await Expense.findById(expenseId);
+  if (!expense) {
+  return res.status(404).json({
+    message: "Expense not found",
+  });
+}
+if (expense.user.toString() !== req.user._id.toString()) {
+  return res.status(401).json({
+    message: "Unauthorized",
+  });
+}
+await expense.deleteOne();
+res.status(200).json({
+  message: "Expense deleted successfully",
+});
+} catch (error) {
+    console.log(error);
+
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
 module.exports = {
   addExpense,
   getExpenses,
+  deleteExpense,
 };
