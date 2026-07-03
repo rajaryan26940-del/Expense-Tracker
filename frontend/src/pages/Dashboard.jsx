@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import ExpenseForm from "../components/ExpenseForm";
 import {
@@ -9,7 +10,12 @@ import {
 } from "../services/expenseService";
 
 function Dashboard() {
+  const navigate = useNavigate();
   const [expenseName, setExpenseName] = useState("");
+  function handleLogout() {
+  localStorage.removeItem("token");
+  navigate("/");
+}
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
   const [expenses, setExpenses] = useState([]);
@@ -157,6 +163,12 @@ function Dashboard() {
       <h2 className="dashboard-title">
         Welcome Raj
       </h2>
+      <button
+  className="logout-btn"
+  onClick={handleLogout}
+>
+  Logout
+</button>
 
       <button
         className="theme-btn"
