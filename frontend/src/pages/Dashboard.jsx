@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import "../styles/Dashboard.css";
 import ExpenseForm from "../components/ExpenseForm";
-import { getExpenses } from "../services/expenseService";
+import {
+  getExpenses,
+  addExpense,
+} from "../services/expenseService";
 
 function Dashboard() {
   const [expenseName, setExpenseName] = useState("");
@@ -70,38 +73,34 @@ return matchesSearch && matchesCategory && matchesMonth;
     return 0;
   });
 
-  function handleSaveExpense() {
-    if (expenseName === "") {
-      alert("Please enter Expense Name");
-      return;
-    }
+  async function handleSaveExpense() {
+  if (expenseName === "") {
+    alert("Please enter Expense Name");
+    return;
+  }
 
-    if (amount === "") {
-      alert("Please enter Amount");
-      return;
-    }
+  if (amount === "") {
+    alert("Please enter Amount");
+    return;
+  }
 
-   const newExpense = {
-  name: expenseName,
-  amount: amount,
-  category: category,
-  date: new Date().toLocaleDateString(),
-  time: new Date().toLocaleTimeString(),
-};
+  try {
+    const data = await addExpense({
+      title: expenseName,
+      amount: amount,
+      category: category,
+    });
 
-    if (editIndex === null) {
-      setExpenses([...expenses, newExpense]);
-    } else {
-      const updatedExpenses = [...expenses];
-      updatedExpenses[editIndex] = newExpense;
-      setExpenses(updatedExpenses);
-      setEditIndex(null);
-    }
+    setExpenses([data.expense, ...expenses]);
 
     setExpenseName("");
     setAmount("");
     setCategory("Food");
+  } catch (error) {
+    console.log(error);
+    alert(error.response?.data?.message || "Failed to add expense");
   }
+}
 
   function handleDeleteExpense(indexToDelete) {
     const updatedExpenses = expenses.filter(
