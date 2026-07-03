@@ -191,3 +191,10 @@
   color: black;
   min-height: 100vh;
 }
+button {
+  transition: transform 0.1s ease;
+}
+
+button:active {
+  transform: scale(0.96);
+}
