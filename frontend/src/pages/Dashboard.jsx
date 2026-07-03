@@ -4,6 +4,7 @@ import ExpenseForm from "../components/ExpenseForm";
 import {
   getExpenses,
   addExpense,
+  deleteExpense,
 } from "../services/expenseService";
 
 function Dashboard() {
@@ -102,13 +103,18 @@ return matchesSearch && matchesCategory && matchesMonth;
   }
 }
 
-  function handleDeleteExpense(indexToDelete) {
-    const updatedExpenses = expenses.filter(
-      (expense, index) => index !== indexToDelete
-    );
+  async function handleDeleteExpense(id) {
+  try {
+    await deleteExpense(id);
 
-    setExpenses(updatedExpenses);
+    setExpenses(
+      expenses.filter((expense) => expense._id !== id)
+    );
+  } catch (error) {
+    console.log(error);
+    alert(error.response?.data?.message || "Failed to delete expense");
   }
+}
 
   function handleEditExpense(index) {
     const expense = expenses[index];
@@ -257,11 +263,11 @@ return matchesSearch && matchesCategory && matchesMonth;
                 </button>
 
                 <button
-                  className="delete-btn"
-                  onClick={() => handleDeleteExpense(index)}
-                >
-                  Delete
-                </button>
+  className="delete-btn"
+  onClick={() => handleDeleteExpense(expense._id)}
+>
+  Delete
+</button>
               </td>
             </tr>
           ))}
