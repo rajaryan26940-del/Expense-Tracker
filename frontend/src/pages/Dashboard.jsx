@@ -1,19 +1,28 @@
 import { useState, useEffect } from "react";
 import "../styles/Dashboard.css";
 import ExpenseForm from "../components/ExpenseForm";
+import { getExpenses } from "../services/expenseService";
 
 function Dashboard() {
   const [expenseName, setExpenseName] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
- const [expenses, setExpenses] = useState(() => {
-  const savedExpenses = localStorage.getItem("expenses");
+ const [expenses, setExpenses] = useState([]);
+ const [loading, setLoading] = useState(true);
+ useEffect(() => {
+  const fetchExpenses = async () => {
+    try {
+  const data = await getExpenses();
+  setExpenses(data.expenses);
+} catch (error) {
+  console.log(error);
+} finally {
+  setLoading(false);
+}
+  };
 
-  return savedExpenses ? JSON.parse(savedExpenses) : [];
-});
-useEffect(() => {
-  localStorage.setItem("expenses", JSON.stringify(expenses));
-}, [expenses]);
+  fetchExpenses();
+}, []);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
   const [editIndex, setEditIndex] = useState(null);
@@ -33,9 +42,9 @@ const highestExpense =
 
   const filteredExpenses = expenses
   .filter((expense) => {
-    const matchesSearch = expense.name
-      .toLowerCase()
-      .includes(search.toLowerCase());
+    const matchesSearch = expense.title
+  .toLowerCase()
+  .includes(search.toLowerCase());
 
     const matchesCategory =
   filterCategory === "All" ||
@@ -224,17 +233,20 @@ return matchesSearch && matchesCategory && matchesMonth;
         </thead>
 
         <tbody>
-          {filteredExpenses.length === 0 && (
-            <tr>
-              <td colSpan="4">No expenses found.</td>
-            </tr>
-          )}
-
+          {loading ? (
+  <tr>
+    <td colSpan="6">Loading expenses...</td>
+  </tr>
+) : filteredExpenses.length === 0 ? (
+  <tr>
+    <td colSpan="6">No expenses found.</td>
+  </tr>
+) : null}
           {filteredExpenses.map((expense, index) => (
             <tr key={index}>
-  <td>{expense.date}</td>
-  <td>{expense.time}</td>
-  <td>{expense.name}</td>
+ <td>{new Date(expense.createdAt).toLocaleDateString()}</td>
+<td>{new Date(expense.createdAt).toLocaleTimeString()}</td>
+<td>{expense.title}</td>
   <td>₹ {expense.amount}</td>
   <td>{expense.category}</td>
               <td>
