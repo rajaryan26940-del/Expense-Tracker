@@ -123,10 +123,12 @@ function Dashboard() {
         );
 
         setEditId(null);
+        alert("Expense updated successfully!");
       } else {
         const data = await addExpense(expenseData);
 
         setExpenses([data.expense, ...expenses]);
+        alert("Expense added successfully!");
       }
 
       setExpenseName("");
@@ -156,6 +158,8 @@ function Dashboard() {
     setExpenses(
       expenses.filter((expense) => expense._id !== id)
     );
+    alert("Expense deleted successfully!");
+    
   } catch (error) {
     console.log(error);
     alert(
