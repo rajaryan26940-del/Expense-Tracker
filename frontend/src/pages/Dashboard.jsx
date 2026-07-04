@@ -96,16 +96,18 @@ function Dashboard() {
       : 0;
 
   async function handleSaveExpense() {
-    if (expenseName === "") {
-      alert("Please enter Expense Name");
-      return;
-    }
-
+  if (expenseName.trim() === "") {
+  alert("Please enter Expense Name");
+  return;
+}
     if (amount === "") {
       alert("Please enter Amount");
       return;
     }
-
+if (Number(amount) <= 0) {
+  alert("Amount must be greater than 0");
+  return;
+}
     try {
       const expenseData = {
         title: expenseName,
