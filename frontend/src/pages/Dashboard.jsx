@@ -40,19 +40,7 @@ function Dashboard() {
     };
 
     fetchExpenses();
-  }, []);
-
-  const totalExpense = expenses.reduce(
-    (total, expense) => total + Number(expense.amount),
-    0
-  );
-
-  const totalEntries = expenses.length;
-
-  const highestExpense =
-    expenses.length > 0
-      ? Math.max(...expenses.map((expense) => Number(expense.amount)))
-      : 0;
+  }, []); 
 
   const filteredExpenses = expenses
     .filter((expense) => {
@@ -85,7 +73,19 @@ function Dashboard() {
 
       return 0;
     });
+const totalExpense = filteredExpenses.reduce(
+  (total, expense) => total + Number(expense.amount),
+  0
+);
 
+const totalEntries = filteredExpenses.length;
+
+const highestExpense =
+  filteredExpenses.length > 0
+    ? Math.max(
+        ...filteredExpenses.map((expense) => Number(expense.amount))
+      )
+    : 0;
   async function handleSaveExpense() {
     if (expenseName === "") {
       alert("Please enter Expense Name");
