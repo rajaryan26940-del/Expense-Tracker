@@ -142,21 +142,28 @@ function Dashboard() {
   }
 
   async function handleDeleteExpense(id) {
-    try {
-      await deleteExpense(id);
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this expense?"
+  );
 
-      setExpenses(
-        expenses.filter((expense) => expense._id !== id)
-      );
-    } catch (error) {
-      console.log(error);
-      alert(
-        error.response?.data?.message ||
-          "Failed to delete expense"
-      );
-    }
+  if (!confirmDelete) {
+    return;
   }
 
+  try {
+    await deleteExpense(id);
+
+    setExpenses(
+      expenses.filter((expense) => expense._id !== id)
+    );
+  } catch (error) {
+    console.log(error);
+    alert(
+      error.response?.data?.message ||
+        "Failed to delete expense"
+    );
+  }
+}
   function handleEditExpense(expense) {
     setExpenseName(expense.title);
     setAmount(expense.amount);
