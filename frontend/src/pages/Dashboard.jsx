@@ -28,9 +28,11 @@ function Dashboard() {
   function handleLogout() {
   localStorage.removeItem("token");
   localStorage.removeItem("name");
+
+  alert("Logout Successful!");
+
   navigate("/");
 }
-
   useEffect(() => {
     const fetchExpenses = async () => {
       try {
