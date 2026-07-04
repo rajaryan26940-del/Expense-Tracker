@@ -164,6 +164,12 @@ function Dashboard() {
     setEditId(expense._id);
   }
 
+  function handleCancelEdit() {
+  setExpenseName("");
+  setAmount("");
+  setCategory("Food");
+  setEditId(null);
+}
   return (
     <div
       className={`dashboard-container ${
@@ -222,6 +228,7 @@ function Dashboard() {
         setCategory={setCategory}
         handleSaveExpense={handleSaveExpense}
         editId={editId}
+        handleCancelEdit={handleCancelEdit}
       />
 
       <hr />
