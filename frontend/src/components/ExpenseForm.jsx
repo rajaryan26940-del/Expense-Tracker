@@ -6,12 +6,13 @@ function ExpenseForm({
   category,
   setCategory,
   handleSaveExpense,
+  editId,
 }) {
   return (
     <div className="dashboard-form">
       <h2 className="dashboard-title">
-        Add New Expense
-      </h2>
+  {editId ? "Edit Expense" : "Add New Expense"}
+</h2>
 
       <input
         type="text"
@@ -37,13 +38,12 @@ function ExpenseForm({
         <option>Bills</option>
         <option>Others</option>
       </select>
-
-      <button
-        className="save-btn"
-        onClick={handleSaveExpense}
-      >
-        Save Expense
-      </button>
+<button
+  className="save-btn"
+  onClick={handleSaveExpense}
+>
+  {editId ? "Update Expense" : "Save Expense"}
+</button>
     </div>
   );
 }

@@ -209,6 +209,7 @@ const highestExpense =
         category={category}
         setCategory={setCategory}
         handleSaveExpense={handleSaveExpense}
+        editId={editId}
       />
 
       <hr />
