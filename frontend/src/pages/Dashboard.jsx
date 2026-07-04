@@ -26,6 +26,14 @@ function Dashboard() {
   const [darkMode, setDarkMode] = useState(false);
 
   function handleLogout() {
+  const confirmLogout = window.confirm(
+    "Are you sure you want to logout?"
+  );
+
+  if (!confirmLogout) {
+    return;
+  }
+
   localStorage.removeItem("token");
   localStorage.removeItem("name");
 
