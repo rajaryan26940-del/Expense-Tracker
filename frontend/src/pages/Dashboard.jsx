@@ -26,9 +26,10 @@ function Dashboard() {
   const [darkMode, setDarkMode] = useState(false);
 
   function handleLogout() {
-    localStorage.removeItem("token");
-    navigate("/");
-  }
+  localStorage.removeItem("token");
+  localStorage.removeItem("name");
+  navigate("/");
+}
 
   useEffect(() => {
     const fetchExpenses = async () => {
