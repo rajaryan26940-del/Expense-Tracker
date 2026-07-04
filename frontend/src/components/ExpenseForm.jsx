@@ -8,6 +8,7 @@ function ExpenseForm({
   handleSaveExpense,
   editId,
   handleCancelEdit,
+  saving,
 }) {
   return (
     <div className="dashboard-form">
@@ -42,8 +43,15 @@ function ExpenseForm({
 <button
   className="save-btn"
   onClick={handleSaveExpense}
+  disabled={saving}
 >
-  {editId ? "Update Expense" : "Save Expense"}
+  {saving
+    ? editId
+      ? "Updating..."
+      : "Saving..."
+    : editId
+    ? "Update Expense"
+    : "Save Expense"}
 </button>
 {editId && (
   <button

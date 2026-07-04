@@ -17,6 +17,7 @@ function Dashboard() {
   const [category, setCategory] = useState("Food");
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [filterCategory, setFilterCategory] = useState("All");
   const [editId, setEditId] = useState(null);
@@ -109,6 +110,7 @@ if (Number(amount) <= 0) {
   return;
 }
     try {
+      setSaving(true);
       const expenseData = {
         title: expenseName,
         amount: amount,
@@ -137,12 +139,14 @@ if (Number(amount) <= 0) {
       setAmount("");
       setCategory("Food");
     } catch (error) {
-      console.log(error);
-      alert(
-        error.response?.data?.message ||
-          "Failed to save expense"
-      );
-    }
+  console.log(error);
+  alert(
+    error.response?.data?.message ||
+      "Failed to save expense"
+  );
+} finally {
+  setSaving(false);
+}
   }
 
   async function handleDeleteExpense(id) {
@@ -242,6 +246,7 @@ if (Number(amount) <= 0) {
         handleSaveExpense={handleSaveExpense}
         editId={editId}
         handleCancelEdit={handleCancelEdit}
+        saving={saving}
       />
 
       <hr />
