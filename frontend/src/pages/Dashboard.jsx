@@ -71,7 +71,10 @@ function Dashboard() {
         return Number(a.amount) - Number(b.amount);
       }
 
-      return 0;
+     return (
+  new Date(b.updatedAt || b.createdAt) -
+  new Date(a.updatedAt || a.createdAt)
+);
     });
 const totalExpense = filteredExpenses.reduce(
   (total, expense) => total + Number(expense.amount),
