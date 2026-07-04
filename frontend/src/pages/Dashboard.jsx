@@ -211,13 +211,30 @@ function Dashboard() {
       <hr />
 
       <h2>Recent Expenses</h2>
+      <input
+  type="text"
+  placeholder="Search expenses..."
+  value={search}
+  onChange={(e) => setSearch(e.target.value)}
+/>
+<select
+  value={filterCategory}
+  onChange={(e) => setFilterCategory(e.target.value)}
+>
+  <option value="All">All Categories</option>
+  <option value="Food">Food</option>
+  <option value="Travel">Travel</option>
+  <option value="Shopping">Shopping</option>
+  <option value="Bills">Bills</option>
+  <option value="Others">Others</option>
+</select>
 
       <select
         value={selectedMonth}
         onChange={(e) => setSelectedMonth(e.target.value)}
       >
         <option value="All">All Months</option>
-        <option value="January">January</option>
+        <option value="January">January</option> 
         <option value="February">February</option>
         <option value="March">March</option>
         <option value="April">April</option>
