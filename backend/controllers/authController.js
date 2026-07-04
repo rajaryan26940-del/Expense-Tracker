@@ -54,6 +54,7 @@ const token = jwt.sign(
 res.status(200).json({
   message: "Login Successful",
   token,
+  name: user.name,
 });
   } catch (error) {
     console.log(error)

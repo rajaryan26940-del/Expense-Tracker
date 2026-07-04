@@ -198,8 +198,8 @@ if (Number(amount) <= 0) {
       </h1>
 
       <h2 className="dashboard-title">
-        Welcome Raj
-      </h2>
+  Welcome {localStorage.getItem("name")}
+</h2>
 
       <button
         className="logout-btn"

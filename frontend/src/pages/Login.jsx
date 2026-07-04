@@ -25,7 +25,7 @@ const navigate = useNavigate();
   });
 
   localStorage.setItem("token", data.token);
-
+localStorage.setItem("name", data.name);
   navigate("/dashboard");
 } catch (error) {
   alert(error.response?.data?.message || "Login Failed");
