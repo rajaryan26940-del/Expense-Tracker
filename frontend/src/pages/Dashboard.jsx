@@ -11,11 +11,8 @@ import {
 
 function Dashboard() {
   const navigate = useNavigate();
+
   const [expenseName, setExpenseName] = useState("");
-  function handleLogout() {
-  localStorage.removeItem("token");
-  navigate("/");
-}
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
   const [expenses, setExpenses] = useState([]);
@@ -26,6 +23,11 @@ function Dashboard() {
   const [sortOption, setSortOption] = useState("latest");
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [darkMode, setDarkMode] = useState(false);
+
+  function handleLogout() {
+    localStorage.removeItem("token");
+    navigate("/");
+  }
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -40,7 +42,7 @@ function Dashboard() {
     };
 
     fetchExpenses();
-  }, []); 
+  }, []);
 
   const filteredExpenses = expenses
     .filter((expense) => {
@@ -71,24 +73,28 @@ function Dashboard() {
         return Number(a.amount) - Number(b.amount);
       }
 
-     return (
-  new Date(b.updatedAt || b.createdAt) -
-  new Date(a.updatedAt || a.createdAt)
-);
+      return (
+        new Date(b.updatedAt || b.createdAt) -
+        new Date(a.updatedAt || a.createdAt)
+      );
     });
-const totalExpense = filteredExpenses.reduce(
-  (total, expense) => total + Number(expense.amount),
-  0
-);
 
-const totalEntries = filteredExpenses.length;
+  const totalExpense = filteredExpenses.reduce(
+    (total, expense) => total + Number(expense.amount),
+    0
+  );
 
-const highestExpense =
-  filteredExpenses.length > 0
-    ? Math.max(
-        ...filteredExpenses.map((expense) => Number(expense.amount))
-      )
-    : 0;
+  const totalEntries = filteredExpenses.length;
+
+  const highestExpense =
+    filteredExpenses.length > 0
+      ? Math.max(
+          ...filteredExpenses.map((expense) =>
+            Number(expense.amount)
+          )
+        )
+      : 0;
+
   async function handleSaveExpense() {
     if (expenseName === "") {
       alert("Please enter Expense Name");
@@ -128,7 +134,10 @@ const highestExpense =
       setCategory("Food");
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Failed to save expense");
+      alert(
+        error.response?.data?.message ||
+          "Failed to save expense"
+      );
     }
   }
 
@@ -141,7 +150,10 @@ const highestExpense =
       );
     } catch (error) {
       console.log(error);
-      alert(error.response?.data?.message || "Failed to delete expense");
+      alert(
+        error.response?.data?.message ||
+          "Failed to delete expense"
+      );
     }
   }
 
@@ -149,7 +161,6 @@ const highestExpense =
     setExpenseName(expense.title);
     setAmount(expense.amount);
     setCategory(expense.category);
-
     setEditId(expense._id);
   }
 
@@ -166,12 +177,13 @@ const highestExpense =
       <h2 className="dashboard-title">
         Welcome Raj
       </h2>
+
       <button
-  className="logout-btn"
-  onClick={handleLogout}
->
-  Logout
-</button>
+        className="logout-btn"
+        onClick={handleLogout}
+      >
+        Logout
+      </button>
 
       <button
         className="theme-btn"
@@ -215,54 +227,65 @@ const highestExpense =
       <hr />
 
       <h2>Recent Expenses</h2>
-      <input
-  type="text"
-  placeholder="Search expenses..."
-  value={search}
-  onChange={(e) => setSearch(e.target.value)}
-/>
-<select
-  value={filterCategory}
-  onChange={(e) => setFilterCategory(e.target.value)}
->
-  <option value="All">All Categories</option>
-  <option value="Food">Food</option>
-  <option value="Travel">Travel</option>
-  <option value="Shopping">Shopping</option>
-  <option value="Bills">Bills</option>
-  <option value="Others">Others</option>
-</select>
 
-      <select
-        value={selectedMonth}
-        onChange={(e) => setSelectedMonth(e.target.value)}
-      >
-        <option value="All">All Months</option>
-        <option value="January">January</option> 
-        <option value="February">February</option>
-        <option value="March">March</option>
-        <option value="April">April</option>
-        <option value="May">May</option>
-        <option value="June">June</option>
-        <option value="July">July</option>
-        <option value="August">August</option>
-        <option value="September">September</option>
-        <option value="October">October</option>
-        <option value="November">November</option>
-        <option value="December">December</option>
-      </select>
+      <div className="filter-controls">
+        <input
+          type="text"
+          placeholder="Search expenses..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
 
-      <br />
-      <br />
+        <select
+          value={filterCategory}
+          onChange={(e) =>
+            setFilterCategory(e.target.value)
+          }
+        >
+          <option value="All">All Categories</option>
+          <option value="Food">Food</option>
+          <option value="Travel">Travel</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Bills">Bills</option>
+          <option value="Others">Others</option>
+        </select>
 
-      <select
-        value={sortOption}
-        onChange={(e) => setSortOption(e.target.value)}
-      >
-        <option value="latest">Latest</option>
-        <option value="highest">Highest Amount</option>
-        <option value="lowest">Lowest Amount</option>
-      </select>
+        <select
+          value={selectedMonth}
+          onChange={(e) =>
+            setSelectedMonth(e.target.value)
+          }
+        >
+          <option value="All">All Months</option>
+          <option value="January">January</option>
+          <option value="February">February</option>
+          <option value="March">March</option>
+          <option value="April">April</option>
+          <option value="May">May</option>
+          <option value="June">June</option>
+          <option value="July">July</option>
+          <option value="August">August</option>
+          <option value="September">September</option>
+          <option value="October">October</option>
+          <option value="November">November</option>
+          <option value="December">December</option>
+        </select>
+
+        <select
+          value={sortOption}
+          onChange={(e) =>
+            setSortOption(e.target.value)
+          }
+        >
+          <option value="latest">Latest</option>
+          <option value="highest">
+            Highest Amount
+          </option>
+          <option value="lowest">
+            Lowest Amount
+          </option>
+        </select>
+      </div>
 
       <br />
       <br />
@@ -282,24 +305,30 @@ const highestExpense =
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan="6">Loading expenses...</td>
+              <td colSpan="6">
+                Loading expenses...
+              </td>
             </tr>
           ) : filteredExpenses.length === 0 ? (
             <tr>
-              <td colSpan="6">No expenses found.</td>
+              <td colSpan="6">
+                No expenses found.
+              </td>
             </tr>
           ) : (
             filteredExpenses.map((expense) => (
               <tr key={expense._id}>
                 <td>
                   {new Date(
-                    expense.updatedAt || expense.createdAt
+                    expense.updatedAt ||
+                      expense.createdAt
                   ).toLocaleDateString()}
                 </td>
 
                 <td>
                   {new Date(
-                    expense.updatedAt || expense.createdAt
+                    expense.updatedAt ||
+                      expense.createdAt
                   ).toLocaleTimeString()}
                 </td>
 
@@ -310,7 +339,9 @@ const highestExpense =
                 <td>
                   <button
                     className="edit-btn"
-                    onClick={() => handleEditExpense(expense)}
+                    onClick={() =>
+                      handleEditExpense(expense)
+                    }
                   >
                     Edit
                   </button>
