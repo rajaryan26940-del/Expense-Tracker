@@ -7,19 +7,22 @@ function Register() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   async function handleRegister() {
   try {
+    setLoading(true);
   const data = await registerUser({
     name,
     email,
     password,
   });
 
-  alert("Registration Successful");
+ alert("Registration Successful! Please login.");
   navigate("/");
 } catch (error) {
   console.log(error);
+  setLoading(false);
   alert(error.response?.data?.message || "Registration Failed");
 }
 }
@@ -51,7 +54,9 @@ function Register() {
         onChange={(e) => setPassword(e.target.value)}
       />
 
-     <button onClick={handleRegister}>Register</button>
+     <button onClick={handleRegister} disabled={loading}>
+  {loading ? "Registering..." : "Register"}
+</button>
     </div>
   );
 }
