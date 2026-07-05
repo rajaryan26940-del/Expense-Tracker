@@ -6,6 +6,7 @@ import { loginUser } from "../services/authService";
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 const navigate = useNavigate();
   async function handleLogin() {
     if (email === "") {
@@ -19,6 +20,7 @@ const navigate = useNavigate();
     }
 
   try {
+    setLoading(true);
   const data = await loginUser({
     email,
     password,
@@ -26,9 +28,12 @@ const navigate = useNavigate();
 
   localStorage.setItem("token", data.token);
 localStorage.setItem("name", data.name);
+alert("Login Successful!");
   navigate("/dashboard");
 } catch (error) {
   alert(error.response?.data?.message || "Login Failed");
+} finally {
+  setLoading(false);
 }
   }
 
@@ -52,7 +57,12 @@ localStorage.setItem("name", data.name);
         onChange={(e) => setPassword(e.target.value)}
       />
 
-      <button onClick={handleLogin}>Login</button>
+      <button
+  onClick={handleLogin}
+  disabled={loading}
+>
+  {loading ? "Logging in..." : "Login"}
+</button>
       <p>
   Don't have an account? <Link to="/register">Register</Link>
 </p>
