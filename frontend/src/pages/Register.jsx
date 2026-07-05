@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/Login.css";
 import { registerUser } from "../services/authService";
 
@@ -68,7 +68,9 @@ if (password === "") {
 
      <button onClick={handleRegister} disabled={loading}>
   {loading ? "Registering..." : "Register"}
-</button>
+</button> <p>
+  Already have an account? <Link to="/">Login</Link>
+</p>
     </div>
   );
 }
