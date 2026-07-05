@@ -34,8 +34,9 @@ if (password === "") {
   navigate("/");
 } catch (error) {
   console.log(error);
-  setLoading(false);
   alert(error.response?.data?.message || "Registration Failed");
+}finally {
+  setLoading(false);
 }
 }
 
