@@ -10,15 +10,15 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   async function handleRegister() {
-    if (name === "") {
+    if (name.trim() === "") {
   alert("Please enter your name");
   return;
 }
-if (email === "") {
+if (email.trim() === "") {
   alert("Please enter your email");
   return;
 }
-if (password === "") {
+if (password.trim() === "") {
   alert("Please enter your password");
   return;
 }
