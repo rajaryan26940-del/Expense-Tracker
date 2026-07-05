@@ -10,6 +10,18 @@ function Register() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   async function handleRegister() {
+    if (name === "") {
+  alert("Please enter your name");
+  return;
+}
+if (email === "") {
+  alert("Please enter your email");
+  return;
+}
+if (password === "") {
+  alert("Please enter your password");
+  return;
+}
   try {
     setLoading(true);
   const data = await registerUser({
