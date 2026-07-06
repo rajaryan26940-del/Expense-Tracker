@@ -23,9 +23,16 @@ function Dashboard() {
   const [editId, setEditId] = useState(null);
   const [sortOption, setSortOption] = useState("latest");
   const [selectedMonth, setSelectedMonth] = useState("All");
-  const [darkMode, setDarkMode] = useState(false);
+ const [darkMode, setDarkMode] = useState(
+  localStorage.getItem("darkMode") === "true");
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  function handleThemeToggle() {
+  const newDarkMode = !darkMode;
+
+  setDarkMode(newDarkMode);
+  localStorage.setItem("darkMode", newDarkMode);
+}
   function handleLogout() {
   const confirmLogout = window.confirm(
     "Are you sure you want to logout?"
@@ -238,7 +245,7 @@ if (Number(amount) <= 0) {
 
       <button
         className="theme-btn"
-        onClick={() => setDarkMode(!darkMode)}
+        onClick={handleThemeToggle}
       >
         {darkMode ? "🌞 Light Mode" : "🌑 Dark Mode"}
       </button>
