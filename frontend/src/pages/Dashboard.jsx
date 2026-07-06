@@ -122,7 +122,7 @@ function Dashboard() {
   alert("Please enter Expense Name");
   return;
 }
-    if (amount === "") {
+    if (amount.trim() === "") {
       alert("Please enter Amount");
       return;
     }
