@@ -24,7 +24,7 @@ function Dashboard() {
   const [sortOption, setSortOption] = useState("latest");
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [darkMode, setDarkMode] = useState(false);
-
+  const [showForm, setShowForm] = useState(false);
   function handleLogout() {
   const confirmLogout = window.confirm(
     "Are you sure you want to logout?"
@@ -149,6 +149,7 @@ if (Number(amount) <= 0) {
       setExpenseName("");
       setAmount("");
       setCategory("Food");
+      setShowForm(false);
     } catch (error) {
   console.log(error);
   alert(
@@ -190,6 +191,7 @@ if (Number(amount) <= 0) {
     setAmount(expense.amount);
     setCategory(expense.category);
     setEditId(expense._id);
+    setShowForm(true);
   }
 
   function handleCancelEdit() {
@@ -197,6 +199,7 @@ if (Number(amount) <= 0) {
   setAmount("");
   setCategory("Food");
   setEditId(null);
+  setShowForm(false);
 }
   return (
     <div
@@ -243,10 +246,12 @@ if (Number(amount) <= 0) {
         </div>
       </div>
 
-      <button>Add Expense</button>
+      <button onClick={() => setShowForm(true)}>
+  Add Expense
+</button>
 
       <hr />
-
+{showForm && (
       <ExpenseForm
         expenseName={expenseName}
         setExpenseName={setExpenseName}
@@ -259,6 +264,7 @@ if (Number(amount) <= 0) {
         handleCancelEdit={handleCancelEdit}
         saving={saving}
       />
+      )}
 
       <hr />
 
