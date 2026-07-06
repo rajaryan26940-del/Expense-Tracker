@@ -221,7 +221,15 @@ if (Number(amount) <= 0) {
     setShowForm(true);
   }
 
-  function handleCancelEdit() {
+ function handleCancelEdit() {
+  const confirmCancel = window.confirm(
+    "Are you sure you want to cancel editing?"
+  );
+
+  if (!confirmCancel) {
+    return;
+  }
+
   setExpenseName("");
   setAmount("");
   setCategory("Food");
