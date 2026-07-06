@@ -106,6 +106,16 @@ function Dashboard() {
           )
         )
       : 0;
+      function handleToggleForm() {
+  if (showForm) {
+    setExpenseName("");
+    setAmount("");
+    setCategory("Food");
+    setEditId(null);
+  }
+
+  setShowForm(!showForm);
+}
 
   async function handleSaveExpense() {
   if (expenseName.trim() === "") {
@@ -246,7 +256,7 @@ if (Number(amount) <= 0) {
         </div>
       </div>
 
-     <button onClick={() => setShowForm(!showForm)}>
+    <button onClick={handleToggleForm}>
   {showForm ? "Close Form" : "Add Expense"}
 </button>
 
