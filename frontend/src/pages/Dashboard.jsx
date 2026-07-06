@@ -298,7 +298,11 @@ if (Number(amount) <= 0) {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
-
+{search && (
+  <button onClick={() => setSearch("")}>
+    Clear Search
+  </button>
+)}
         <select
           value={filterCategory}
           onChange={(e) =>
