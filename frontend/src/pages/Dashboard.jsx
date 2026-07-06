@@ -246,8 +246,8 @@ if (Number(amount) <= 0) {
         </div>
       </div>
 
-      <button onClick={() => setShowForm(true)}>
-  Add Expense
+     <button onClick={() => setShowForm(!showForm)}>
+  {showForm ? "Close Form" : "Add Expense"}
 </button>
 
       <hr />
