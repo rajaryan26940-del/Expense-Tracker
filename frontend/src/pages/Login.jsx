@@ -29,7 +29,7 @@ const navigate = useNavigate();
   localStorage.setItem("token", data.token);
 localStorage.setItem("name", data.name);
 alert("Login Successful!");
-  navigate("/dashboard");
+window.location.replace("/dashboard");
 } catch (error) {
   alert(error.response?.data?.message || "Login Failed");
 } finally {
