@@ -120,7 +120,17 @@ function Dashboard() {
   setSelectedMonth("All");
   setSortOption("latest");
 }
-      function handleToggleForm() {
+     function handleToggleForm() {
+  if (showForm && editId) {
+    const confirmClose = window.confirm(
+      "Are you sure you want to close editing?"
+    );
+
+    if (!confirmClose) {
+      return;
+    }
+  }
+
   if (showForm) {
     setExpenseName("");
     setAmount("");
