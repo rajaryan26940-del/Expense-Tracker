@@ -25,6 +25,7 @@ function Dashboard() {
   const [selectedMonth, setSelectedMonth] = useState("All");
   const [darkMode, setDarkMode] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
   function handleLogout() {
   const confirmLogout = window.confirm(
     "Are you sure you want to logout?"
@@ -181,6 +182,7 @@ if (Number(amount) <= 0) {
   }
 
   try {
+    setDeletingId(id);
     await deleteExpense(id);
 
     setExpenses(
@@ -194,7 +196,9 @@ if (Number(amount) <= 0) {
       error.response?.data?.message ||
         "Failed to delete expense"
     );
-  }
+  } finally {
+  setDeletingId(null);
+}
 }
   function handleEditExpense(expense) {
     setExpenseName(expense.title);
@@ -399,13 +403,16 @@ if (Number(amount) <= 0) {
                   </button>
 
                   <button
-                    className="delete-btn"
-                    onClick={() =>
-                      handleDeleteExpense(expense._id)
-                    }
-                  >
-                    Delete
-                  </button>
+  className="delete-btn"
+  onClick={() =>
+    handleDeleteExpense(expense._id)
+  }
+  disabled={deletingId === expense._id}
+>
+  {deletingId === expense._id
+    ? "Deleting..."
+    : "Delete"}
+</button>
                 </td>
               </tr>
             ))
