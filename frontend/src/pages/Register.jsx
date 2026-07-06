@@ -18,6 +18,10 @@ if (email.trim() === "") {
   alert("Please enter your email");
   return;
 }
+if (!email.includes("@")) {
+  alert("Please enter a valid email");
+  return;
+}
 if (password.trim() === "") {
   alert("Please enter your password");
   return;

@@ -13,6 +13,10 @@ const navigate = useNavigate();
       alert("Please enter your email");
       return;
     }
+    if (!email.includes("@")) {
+  alert("Please enter a valid email");
+  return;
+}
 
     if (password === "") {
       alert("Please enter your password");
