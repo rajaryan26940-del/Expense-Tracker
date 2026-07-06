@@ -130,6 +130,19 @@ function Dashboard() {
       return;
     }
   }
+  if (
+  showForm &&
+  !editId &&
+  (expenseName.trim() !== "" || amount.trim() !== "")
+) {
+  const confirmClose = window.confirm(
+    "Are you sure you want to discard this expense?"
+  );
+
+  if (!confirmClose) {
+    return;
+  }
+}
 
   if (showForm) {
     setExpenseName("");
