@@ -388,8 +388,10 @@ if (Number(amount) <= 0) {
           ) : filteredExpenses.length === 0 ? (
             <tr>
               <td colSpan="6">
-                No expenses found.
-              </td>
+  {expenses.length === 0
+    ? "No expenses found."
+    : "No matching expenses found."}
+</td>
             </tr>
           ) : (
             filteredExpenses.map((expense) => (
