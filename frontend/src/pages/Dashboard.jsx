@@ -114,6 +114,12 @@ function Dashboard() {
           )
         )
       : 0;
+      function handleResetFilters() {
+  setSearch("");
+  setFilterCategory("All");
+  setSelectedMonth("All");
+  setSortOption("latest");
+}
       function handleToggleForm() {
   if (showForm) {
     setExpenseName("");
@@ -352,6 +358,9 @@ if (Number(amount) <= 0) {
             Lowest Amount
           </option>
         </select>
+        <button onClick={handleResetFilters}>
+  Reset Filters
+</button>
       </div>
 
       <br />
