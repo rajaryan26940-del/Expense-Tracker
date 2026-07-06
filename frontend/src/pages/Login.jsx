@@ -13,7 +13,7 @@ const navigate = useNavigate();
       alert("Please enter your email");
       return;
     }
-    if (!email.includes("@")) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
   alert("Please enter a valid email");
   return;
 }
