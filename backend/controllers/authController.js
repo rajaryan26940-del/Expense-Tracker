@@ -4,6 +4,15 @@ const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
   try {
    const { name, email, password } = req.body;
+   const passwordRegex =
+  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{6,}$/;
+
+if (!passwordRegex.test(password)) {
+  return res.status(400).json({
+    message:
+      "Password must be at least 6 characters and include a letter, number, and special character",
+  });
+}
 
 const hashedPassword = await bcrypt.hash(password, 10);
 
