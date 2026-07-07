@@ -26,6 +26,17 @@ if (password.trim() === "") {
   alert("Please enter your password");
   return;
 }
+if (
+  password.length < 6 ||
+  !/[A-Za-z]/.test(password) ||
+  !/[0-9]/.test(password) ||
+  !/[^A-Za-z0-9]/.test(password)
+) {
+  alert(
+    "Password must be at least 6 characters and include a letter, number, and special character"
+  );
+  return;
+}
   try {
     setLoading(true);
   const data = await registerUser({
