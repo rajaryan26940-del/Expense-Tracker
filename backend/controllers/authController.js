@@ -4,6 +4,25 @@ const jwt = require("jsonwebtoken");
 const registerUser = async (req, res) => {
   try {
    const { name, email, password } = req.body;
+
+if (!name || name.trim() === "") {
+  return res.status(400).json({
+    message: "Please enter your name",
+  });
+}
+
+if (!email || email.trim() === "") {
+  return res.status(400).json({
+    message: "Please enter your email",
+  });
+}
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailRegex.test(email.trim())) {
+  return res.status(400).json({
+    message: "Please enter a valid email",
+  });
+}
    const passwordRegex =
   /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{6,}$/;
 
