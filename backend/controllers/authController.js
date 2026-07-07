@@ -61,6 +61,24 @@ const user = new User({
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    if (!email || email.trim() === "") {
+  return res.status(400).json({
+    message: "Please enter your email",
+  });
+}
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+if (!emailRegex.test(email.trim())) {
+  return res.status(400).json({
+    message: "Please enter a valid email",
+  });
+}
+
+if (!password || password.trim() === "") {
+  return res.status(400).json({
+    message: "Please enter your password",
+  });
+}
     const user = await User.findOne({ email });
     if (!user) {
   return res.status(404).json({
