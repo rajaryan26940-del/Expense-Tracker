@@ -5,6 +5,7 @@ const expenseSchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
+      trim: true,
     },
 
     amount: {
@@ -15,6 +16,7 @@ const expenseSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
+      trim: true,
     },
 
     user: {
