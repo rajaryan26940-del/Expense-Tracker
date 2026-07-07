@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import ExpenseForm from "../components/ExpenseForm";
@@ -11,6 +11,7 @@ import {
 
 function Dashboard() {
   const navigate = useNavigate();
+  const formRef = useRef(null);
 
   const [expenseName, setExpenseName] = useState("");
   const [amount, setAmount] = useState("");
@@ -159,7 +160,7 @@ function Dashboard() {
   alert("Please enter Expense Name");
   return;
 }
-    if (amount.trim() === "") {
+    if (String(amount).trim() === "") {
       alert("Please enter Amount");
       return;
     }
@@ -237,12 +238,19 @@ if (Number(amount) <= 0) {
 }
 }
   function handleEditExpense(expense) {
-    setExpenseName(expense.title);
-    setAmount(expense.amount);
-    setCategory(expense.category);
-    setEditId(expense._id);
-    setShowForm(true);
-  }
+  setExpenseName(expense.title);
+  setAmount(expense.amount);
+  setCategory(expense.category);
+  setEditId(expense._id);
+  setShowForm(true);
+
+  setTimeout(() => {
+    formRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 0);
+}
 
  function handleCancelEdit() {
   const confirmCancel = window.confirm(
@@ -310,7 +318,8 @@ if (Number(amount) <= 0) {
 
       <hr />
 {showForm && (
-      <ExpenseForm
+  <div ref={formRef}>
+    <ExpenseForm
         expenseName={expenseName}
         setExpenseName={setExpenseName}
         amount={amount}
@@ -321,8 +330,9 @@ if (Number(amount) <= 0) {
         editId={editId}
         handleCancelEdit={handleCancelEdit}
         saving={saving}
-      />
-      )}
+            />
+  </div>
+)}
 
       <hr />
 
