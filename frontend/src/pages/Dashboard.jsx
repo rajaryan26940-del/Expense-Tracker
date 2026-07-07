@@ -238,6 +238,16 @@ if (Number(amount) <= 0) {
 }
 }
   function handleEditExpense(expense) {
+  if (editId && editId !== expense._id) {
+    const confirmSwitch = window.confirm(
+      "You have unsaved changes. Are you sure you want to edit another expense?"
+    );
+
+    if (!confirmSwitch) {
+      return;
+    }
+  }
+
   setExpenseName(expense.title);
   setAmount(expense.amount);
   setCategory(expense.category);
