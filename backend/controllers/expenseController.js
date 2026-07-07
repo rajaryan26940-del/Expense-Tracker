@@ -2,6 +2,31 @@ const Expense = require("../models/Expense");
 const addExpense = async (req, res) => {
   try {
 const { title, amount, category } = req.body;
+if (!title || title.trim() === "") {
+  return res.status(400).json({
+    message: "Please enter an expense name",
+  });
+}
+if (amount === undefined || amount === null || amount === "") {
+  return res.status(400).json({
+    message: "Please enter an amount",
+  });
+}
+if (Number.isNaN(Number(amount))) {
+  return res.status(400).json({
+    message: "Please enter a valid amount",
+  });
+}
+if (Number(amount) <= 0) {
+  return res.status(400).json({
+    message: "Amount must be greater than 0",
+  });
+}
+if (!category || category.trim() === "") {
+  return res.status(400).json({
+    message: "Please select a category",
+  });
+}
 const userId = req.user._id;
 const expense = new Expense({
   title,
@@ -71,6 +96,35 @@ const updateExpense = async (req, res) => {
   const expenseId = req.params.id;
 
   const { title, amount, category } = req.body;
+  if (!title || title.trim() === "") {
+  return res.status(400).json({
+    message: "Please enter an expense name",
+  });
+}
+
+if (amount === undefined || amount === null || amount === "") {
+  return res.status(400).json({
+    message: "Please enter an amount",
+  });
+}
+
+if (Number.isNaN(Number(amount))) {
+  return res.status(400).json({
+    message: "Please enter a valid amount",
+  });
+}
+
+if (Number(amount) <= 0) {
+  return res.status(400).json({
+    message: "Amount must be greater than 0",
+  });
+}
+
+if (!category || category.trim() === "") {
+  return res.status(400).json({
+    message: "Please select a category",
+  });
+}
   const expense = await Expense.findById(expenseId);
   if (!expense) {
   return res.status(404).json({
