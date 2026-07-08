@@ -64,7 +64,20 @@ function Dashboard() {
 
     fetchExpenses();
   }, []);
+useEffect(() => {
+  const handleBeforeUnload = (event) => {
+    if (editId) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  };
 
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
+  return () => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+  };
+}, [editId]);
   const filteredExpenses = expenses
     .filter((expense) => {
       const matchesSearch = expense.title
