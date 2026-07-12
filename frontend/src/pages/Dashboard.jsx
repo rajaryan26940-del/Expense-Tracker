@@ -65,8 +65,15 @@ function Dashboard() {
     fetchExpenses();
   }, []);
 useEffect(() => {
+  const hasUnsavedChanges =
+    editId ||
+    (showForm &&
+      !editId &&
+      (expenseName.trim() !== "" ||
+        String(amount).trim() !== ""));
+
   const handleBeforeUnload = (event) => {
-    if (editId) {
+    if (hasUnsavedChanges) {
       event.preventDefault();
       event.returnValue = "";
     }
@@ -77,7 +84,7 @@ useEffect(() => {
   return () => {
     window.removeEventListener("beforeunload", handleBeforeUnload);
   };
-}, [editId]);
+}, [editId, showForm, expenseName, amount]);
   const filteredExpenses = expenses
     .filter((expense) => {
       const matchesSearch = expense.title
