@@ -28,6 +28,13 @@ function Dashboard() {
   const [editId, setEditId] = useState(null);
   const [sortOption, setSortOption] = useState("latest");
   const [selectedMonth, setSelectedMonth] = useState("All");
+  const [monthlyBudget, setMonthlyBudget] = useState(() => {
+  const savedBudget = localStorage.getItem("monthlyBudget");
+  return savedBudget ? Number(savedBudget) : 10000;
+});
+const [editingBudget, setEditingBudget] = useState(false);
+
+const [budgetInput, setBudgetInput] = useState(monthlyBudget);
  const [darkMode, setDarkMode] = useState(
   localStorage.getItem("darkMode") === "true");
   const [showForm, setShowForm] = useState(false);
@@ -151,6 +158,12 @@ useEffect(() => {
   totalEntries > 0
     ? Math.round(totalExpense / totalEntries)
     : 0;
+    const remainingBudget = monthlyBudget - totalExpense;
+
+const budgetUsedPercentage = Math.min(
+  (totalExpense / monthlyBudget) * 100,
+  100
+);
       function handleResetFilters() {
   setSearch("");
   setFilterCategory("All");
@@ -457,6 +470,113 @@ function handleExportPDF() {
   <p>₹ {lowestExpense}</p>
 </div>
 </div>
+<div className="budget-section">
+  <h2>Monthly Budget Overview</h2>
+
+  <div className="budget-details">
+    <p>
+      <strong>Budget:</strong> ₹ {monthlyBudget}
+    </p>
+
+    <p>
+      <strong>Spent:</strong> ₹ {totalExpense}
+    </p>
+
+    <p>
+      <strong>Remaining:</strong> ₹ {remainingBudget}
+    </p>
+
+    <p>
+      <strong>Used:</strong>{" "}
+      {budgetUsedPercentage.toFixed(1)}%
+    </p>
+    <div className="budget-progress">
+  <div
+  className="budget-progress-fill"
+  style={{
+    width: `${budgetUsedPercentage}%`,
+    backgroundColor:
+      budgetUsedPercentage < 70
+        ? "#22c55e"
+        : budgetUsedPercentage < 100
+        ? "#f59e0b"
+        : "#ef4444",
+  }}
+></div>
+</div>
+{editingBudget ? (
+  <div className="budget-edit">
+    <input
+      type="number"
+      value={budgetInput}
+      onChange={(e) => setBudgetInput(e.target.value)}
+      placeholder="Enter monthly budget"
+      className="budget-input"
+    />
+
+    <button
+      className="change-budget-btn"
+      onClick={() => {
+        const budget = Number(budgetInput);
+
+        if (isNaN(budget) || budget <= 0) {
+          alert("Please enter a valid budget greater than 0.");
+          return;
+        }
+
+        setMonthlyBudget(budget);
+        setBudgetInput(budget);
+        localStorage.setItem("monthlyBudget", budget);
+        setEditingBudget(false);
+
+        alert("Monthly budget updated successfully!");
+      }}
+    >
+      Save Budget
+    </button>
+
+    <button
+      className="change-budget-btn"
+      onClick={() => {
+        setBudgetInput(monthlyBudget);
+        setEditingBudget(false);
+      }}
+    >
+      Cancel
+    </button>
+  </div>
+) : (
+  <button
+    className="change-budget-btn"
+    onClick={() => setEditingBudget(true)}
+  >
+    Edit Budget
+  </button>
+)}
+{remainingBudget >= 0 ? (
+  <p
+    style={{
+      color: "#16a34a",
+      fontWeight: "bold",
+      marginTop: "12px",
+    }}
+  >
+    ✅ You have ₹ {remainingBudget} remaining this month.
+  </p>
+) : (
+  <p
+    style={{
+      color: "#dc2626",
+      fontWeight: "bold",
+      marginTop: "12px",
+    }}
+  >
+    ⚠️ Budget exceeded by ₹ {Math.abs(remainingBudget)}.
+  </p>
+)}
+  </div>
+</div>
+
 <ExpenseChart
   expenses={expenses}
   averageExpense={averageExpense}
