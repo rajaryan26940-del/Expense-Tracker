@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import ExpenseForm from "../components/ExpenseForm";
 import ExpenseChart from "../components/ExpenseChart";
+import * as XLSX from "xlsx";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import {
   getExpenses,
   addExpense,
@@ -310,6 +313,102 @@ if (Number(amount) <= 0) {
   setEditId(null);
   setShowForm(false);
 }
+function handleExportExcel() {
+  if (filteredExpenses.length === 0) {
+    alert("No expenses available to export.");
+    return;
+  }
+
+  const exportData = filteredExpenses.map((expense) => ({
+    Date: new Date(
+      expense.updatedAt || expense.createdAt
+    ).toLocaleDateString(),
+
+    Time: new Date(
+      expense.updatedAt || expense.createdAt
+    ).toLocaleTimeString(),
+
+    "Expense Name": expense.title,
+    Amount: expense.amount,
+    Category: expense.category,
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+worksheet["!cols"] = [
+  { wch: 15 }, // Date
+  { wch: 15 }, // Time
+  { wch: 30 }, // Expense Name
+  { wch: 12 }, // Amount
+  { wch: 18 }, // Category
+];
+
+const workbook = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "Expenses"
+  );
+
+  XLSX.writeFile(workbook, "expenses.xlsx");
+}
+function handleExportPDF() {
+  if (filteredExpenses.length === 0) {
+    alert("No expenses available to export.");
+    return;
+  }
+
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("Expense Tracker Report", 14, 20);
+
+  doc.setFontSize(11);
+  doc.text(
+    `Exported On: ${new Date().toLocaleString()}`,
+    14,
+    30
+  );
+
+  doc.text(
+    `Total Entries: ${filteredExpenses.length}`,
+    14,
+    38
+  );
+
+ doc.text(
+  `Total Expense: Rs. ${totalExpense}`,
+  14,
+  46
+);
+
+  autoTable(doc, {
+    startY: 55,
+    head: [[
+      "Date",
+      "Time",
+      "Expense Name",
+      "Amount",
+      "Category",
+    ]],
+    body: filteredExpenses.map((expense) => [
+      new Date(
+        expense.updatedAt || expense.createdAt
+      ).toLocaleDateString(),
+
+      new Date(
+        expense.updatedAt || expense.createdAt
+      ).toLocaleTimeString(),
+
+      expense.title,
+      `Rs. ${expense.amount}`,
+      expense.category,
+    ]),
+  });
+
+  doc.save("expenses.pdf");
+}
   return (
     <div
       className={`dashboard-container ${
@@ -388,6 +487,15 @@ if (Number(amount) <= 0) {
       <hr />
 
       <h2>Recent Expenses</h2>
+     <div className="export-buttons">
+  <button onClick={handleExportExcel}>
+    📊 Export Excel
+  </button>
+
+  <button onClick={handleExportPDF}>
+    📄 Export PDF
+  </button>
+</div>
 
       <div className="filter-controls">
         <input
