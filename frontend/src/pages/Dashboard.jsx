@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import ExpenseForm from "../components/ExpenseForm";
+import ExpenseChart from "../components/ExpenseChart";
 import {
   getExpenses,
   addExpense,
@@ -135,6 +136,18 @@ useEffect(() => {
           )
         )
       : 0;
+      const lowestExpense =
+  filteredExpenses.length > 0
+    ? Math.min(
+        ...filteredExpenses.map((expense) =>
+          Number(expense.amount)
+        )
+      )
+    : 0;
+    const averageExpense =
+  totalEntries > 0
+    ? Math.round(totalExpense / totalEntries)
+    : 0;
       function handleResetFilters() {
   setSearch("");
   setFilterCategory("All");
@@ -325,24 +338,32 @@ if (Number(amount) <= 0) {
         {darkMode ? "🌞 Light Mode" : "🌑 Dark Mode"}
       </button>
 
-      <div className="summary-cards">
-        <div className="card">
-          <h3>Total Expense</h3>
-          <p>₹ {totalExpense}</p>
-        </div>
+    <div className="summary-cards">
+  <div className="card">
+    <h3>Total Expense</h3>
+    <p>₹ {totalExpense}</p>
+  </div>
 
-        <div className="card">
-          <h3>Total Entries</h3>
-          <p>{totalEntries}</p>
-        </div>
+  <div className="card">
+    <h3>Total Entries</h3>
+    <p>{totalEntries}</p>
+  </div>
 
-        <div className="card">
-          <h3>Highest Expense</h3>
-          <p>₹ {highestExpense}</p>
-        </div>
-      </div>
+  <div className="card">
+    <h3>Highest Expense</h3>
+    <p>₹ {highestExpense}</p>
+  </div>
+  <div className="card">
+  <h3>Lowest Expense</h3>
+  <p>₹ {lowestExpense}</p>
+</div>
+</div>
+<ExpenseChart
+  expenses={expenses}
+  averageExpense={averageExpense}
+/>
 
-    <button onClick={handleToggleForm}>
+<button onClick={handleToggleForm}>
   {showForm ? "Close Form" : "Add Expense"}
 </button>
 
