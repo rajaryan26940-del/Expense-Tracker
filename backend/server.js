@@ -3,11 +3,13 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 const express = require("express");
 const cors = require("cors");
+const cron = require("node-cron");
 require("dotenv").config();
 
 console.log("PORT:", process.env.PORT);
 
 const connectDB = require("./config/db");
+const processRecurringExpenses = require("./jobs/recurringExpenseJob");
 const authRoutes = require("./routes/authRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
 
@@ -28,4 +30,9 @@ app.get("/", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+cron.schedule("* * * * *", async () => {
+  console.log("Running recurring expense job...");
+
+  await processRecurringExpenses();
 });

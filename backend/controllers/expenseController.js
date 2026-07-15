@@ -1,7 +1,24 @@
 const Expense = require("../models/Expense");
+const processRecurringExpenses = async (userId) => {
+  const recurringExpenses = await Expense.find({
+    user: userId,
+    isRecurring: true,
+  });
+
+  console.log(
+    "Recurring Expenses:",
+    recurringExpenses.length
+  );
+};
 const addExpense = async (req, res) => {
   try {
-const { title, amount, category } = req.body;
+const {
+  title,
+  amount,
+  category,
+  isRecurring,
+  recurringType,
+} = req.body;
 if (!title || title.trim() === "") {
   return res.status(400).json({
     message: "Please enter an expense name",
@@ -32,6 +49,8 @@ const expense = new Expense({
   title,
   amount,
   category,
+  isRecurring,
+  recurringType,
   user: userId,
 });
 await expense.save();
@@ -95,7 +114,13 @@ const updateExpense = async (req, res) => {
   try {
   const expenseId = req.params.id;
 
-  const { title, amount, category } = req.body;
+  const {
+  title,
+  amount,
+  category,
+  isRecurring,
+  recurringType,
+} = req.body;
   if (!title || title.trim() === "") {
   return res.status(400).json({
     message: "Please enter an expense name",
@@ -139,6 +164,8 @@ if (expense.user.toString() !== req.user._id.toString()) {
 expense.title = title;
 expense.amount = amount;
 expense.category = category;
+expense.isRecurring = isRecurring;
+expense.recurringType = recurringType;
 await expense.save();
 res.status(200).json({
   message: "Expense updated successfully",

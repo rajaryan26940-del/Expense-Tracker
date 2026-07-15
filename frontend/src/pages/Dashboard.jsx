@@ -20,6 +20,10 @@ function Dashboard() {
   const [expenseName, setExpenseName] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
+  const [isRecurring, setIsRecurring] = useState(false);
+
+const [recurringType, setRecurringType] =
+  useState("Monthly");
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -164,6 +168,108 @@ const budgetUsedPercentage = Math.min(
   (totalExpense / monthlyBudget) * 100,
   100
 );
+const categoryTotals = {};
+
+filteredExpenses.forEach((expense) => {
+  const category = expense.category;
+
+  categoryTotals[category] =
+    (categoryTotals[category] || 0) +
+    Number(expense.amount);
+});
+let topCategory = "N/A";
+let topCategoryAmount = 0;
+
+Object.entries(categoryTotals).forEach(
+  ([category, total]) => {
+    if (total > topCategoryAmount) {
+      topCategory = category;
+      topCategoryAmount = total;
+    }
+  }
+);
+const currentDate = new Date();
+
+const thisMonthExpense = filteredExpenses.reduce(
+  (total, expense) => {
+    const expenseDate = new Date(
+      expense.updatedAt || expense.createdAt
+    );
+
+    const isCurrentMonth =
+      expenseDate.getMonth() === currentDate.getMonth() &&
+      expenseDate.getFullYear() === currentDate.getFullYear();
+
+    if (isCurrentMonth) {
+      return total + Number(expense.amount);
+    }
+
+    return total;
+  },
+  0
+);
+const lastMonthExpense = filteredExpenses.reduce(
+  (total, expense) => {
+    const expenseDate = new Date(
+      expense.updatedAt || expense.createdAt
+    );
+
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+
+    let previousMonth = currentMonth - 1;
+    let previousYear = currentYear;
+
+    if (previousMonth < 0) {
+      previousMonth = 11;
+      previousYear--;
+    }
+
+    const isLastMonth =
+      expenseDate.getMonth() === previousMonth &&
+      expenseDate.getFullYear() === previousYear;
+
+    if (isLastMonth) {
+      return total + Number(expense.amount);
+    }
+
+    return total;
+  },
+  0
+);
+const expenseDifference =
+  thisMonthExpense - lastMonthExpense;
+
+const expenseTrend =
+  expenseDifference >= 0 ? "Increase" : "Decrease";
+  const currentDay = currentDate.getDate();
+
+const averageDailySpending =
+  currentDay > 0
+    ? Math.round(thisMonthExpense / currentDay)
+    : 0;
+const dailyTotals = {};
+
+filteredExpenses.forEach((expense) => {
+  const date = new Date(
+    expense.updatedAt || expense.createdAt
+  ).toLocaleDateString();
+
+  dailyTotals[date] =
+    (dailyTotals[date] || 0) +
+    Number(expense.amount);
+});
+let highestSpendingDay = "N/A";
+let highestDayAmount = 0;
+
+Object.entries(dailyTotals).forEach(
+  ([date, total]) => {
+    if (total > highestDayAmount) {
+      highestSpendingDay = date;
+      highestDayAmount = total;
+    }
+  }
+);
       function handleResetFilters() {
   setSearch("");
   setFilterCategory("All");
@@ -220,10 +326,12 @@ if (Number(amount) <= 0) {
     try {
       setSaving(true);
       const expenseData = {
-        title: expenseName,
-        amount: amount,
-        category: category,
-      };
+  title: expenseName,
+  amount: amount,
+  category: category,
+  isRecurring,
+  recurringType,
+};
 
       if (editId) {
         const data = await updateExpense(editId, expenseData);
@@ -243,10 +351,12 @@ if (Number(amount) <= 0) {
         alert("Expense added successfully!");
       }
 
-      setExpenseName("");
-      setAmount("");
-      setCategory("Food");
-      setShowForm(false);
+     setExpenseName("");
+setAmount("");
+setCategory("Food");
+setIsRecurring(false);
+setRecurringType("Monthly");
+setShowForm(false);
     } catch (error) {
   console.log(error);
   alert(
@@ -320,11 +430,13 @@ if (Number(amount) <= 0) {
     return;
   }
 
-  setExpenseName("");
-  setAmount("");
-  setCategory("Food");
-  setEditId(null);
-  setShowForm(false);
+ setExpenseName("");
+setAmount("");
+setCategory("Food");
+setIsRecurring(false);
+setRecurringType("Monthly");
+setEditId(null);
+setShowForm(false);
 }
 function handleExportExcel() {
   if (filteredExpenses.length === 0) {
@@ -469,6 +581,94 @@ function handleExportPDF() {
   <h3>Lowest Expense</h3>
   <p>₹ {lowestExpense}</p>
 </div>
+<div className="card">
+  <h3>Most Expensive Category</h3>
+
+  <p>{topCategory}</p>
+
+  <small
+    style={{
+      display: "block",
+      marginTop: "8px",
+      fontSize: "16px",
+      color: "#666",
+    }}
+  >
+    ₹ {topCategoryAmount}
+  </small>
+</div>
+<div className="card">
+  <h3>This Month's Spending</h3>
+
+  <p>₹ {thisMonthExpense}</p>
+</div>
+<div className="card">
+  <h3>Highest Spending Day</h3>
+
+  <p>{highestSpendingDay}</p>
+
+  <small
+    style={{
+      display: "block",
+      marginTop: "8px",
+      fontSize: "16px",
+      color: "#666",
+    }}
+  >
+    ₹ {highestDayAmount}
+  </small>
+</div>
+<div className="card">
+  <h3>Last Month vs This Month</h3>
+
+  <p>₹ {thisMonthExpense}</p>
+
+  <small
+    style={{
+      display: "block",
+      marginTop: "8px",
+      fontSize: "16px",
+      color: "#666",
+    }}
+  >
+    Last: ₹ {lastMonthExpense}
+  </small>
+
+  <small
+    style={{
+      display: "block",
+      marginTop: "8px",
+      fontSize: "16px",
+      fontWeight: "bold",
+      color:
+        expenseTrend === "Increase"
+          ? "#dc2626"
+          : "#16a34a",
+    }}
+  >
+    {expenseTrend === "Increase"
+      ? "📈 Increased"
+      : "📉 Decreased"}
+
+    {" "}₹ {Math.abs(expenseDifference)}
+  </small>
+</div>
+<div className="card">
+  <h3>Average Daily Spending</h3>
+
+  <p>₹ {averageDailySpending}</p>
+
+  <small
+    style={{
+      display: "block",
+      marginTop: "8px",
+      fontSize: "16px",
+      color: "#666",
+    }}
+  >
+    Per Day
+  </small>
+</div>
 </div>
 <div className="budget-section">
   <h2>Monthly Budget Overview</h2>
@@ -590,17 +790,21 @@ function handleExportPDF() {
 {showForm && (
   <div ref={formRef}>
     <ExpenseForm
-        expenseName={expenseName}
-        setExpenseName={setExpenseName}
-        amount={amount}
-        setAmount={setAmount}
-        category={category}
-        setCategory={setCategory}
-        handleSaveExpense={handleSaveExpense}
-        editId={editId}
-        handleCancelEdit={handleCancelEdit}
-        saving={saving}
-            />
+  expenseName={expenseName}
+  setExpenseName={setExpenseName}
+  amount={amount}
+  setAmount={setAmount}
+  category={category}
+  setCategory={setCategory}
+  isRecurring={isRecurring}
+  setIsRecurring={setIsRecurring}
+  recurringType={recurringType}
+  setRecurringType={setRecurringType}
+  handleSaveExpense={handleSaveExpense}
+  editId={editId}
+  handleCancelEdit={handleCancelEdit}
+  saving={saving}
+/>
   </div>
 )}
 
@@ -698,8 +902,9 @@ function handleExportPDF() {
             <th>Time</th>
             <th>Expense Name</th>
             <th>Amount</th>
-            <th>Category</th>
-            <th>Action</th>
+           <th>Category</th>
+<th>Recurring</th>
+<th>Action</th>
           </tr>
         </thead>
 
@@ -739,7 +944,17 @@ function handleExportPDF() {
                 <td>₹ {expense.amount}</td>
                 <td>{expense.category}</td>
 
-                <td>
+<td>
+  {expense.isRecurring ? (
+    <span className="recurring-badge">
+      🔁 {expense.recurringType}
+    </span>
+  ) : (
+    "-"
+  )}
+</td>
+
+<td>
                   <button
                     className="edit-btn"
                     onClick={() =>
@@ -767,9 +982,10 @@ function handleExportPDF() {
         </tbody>
       </table>
 
-      <h2 className="total-expense">
-        Total Expense: ₹ {totalExpense}
-      </h2>
+
+<h2 className="total-expense">
+  Total Expense: ₹ {totalExpense}
+</h2>
     </div>
   );
 }

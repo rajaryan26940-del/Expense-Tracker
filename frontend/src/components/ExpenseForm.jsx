@@ -5,6 +5,10 @@ function ExpenseForm({
   setAmount,
   category,
   setCategory,
+  isRecurring,
+  setIsRecurring,
+  recurringType,
+  setRecurringType,
   handleSaveExpense,
   editId,
   handleCancelEdit,
@@ -40,6 +44,38 @@ function ExpenseForm({
         <option>Bills</option>
         <option>Others</option>
       </select>
+     <label
+  style={{
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    margin: "15px 0",
+    fontWeight: "bold",
+    cursor: "pointer",
+  }}
+>
+ <input
+  type="checkbox"
+  style={{ width: "18px", height: "18px" }}
+    checked={isRecurring}
+    onChange={(e) =>
+      setIsRecurring(e.target.checked)
+    }
+  />
+  Recurring Expense
+</label>
+{isRecurring && (
+  <select
+    value={recurringType}
+    onChange={(e) =>
+      setRecurringType(e.target.value)
+    }
+  >
+    <option value="Monthly">Monthly</option>
+    <option value="Weekly">Weekly</option>
+    <option value="Yearly">Yearly</option>
+  </select>
+)}
 <button
   className="save-btn"
   onClick={handleSaveExpense}
