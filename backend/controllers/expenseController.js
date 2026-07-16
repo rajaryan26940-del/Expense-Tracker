@@ -1,4 +1,5 @@
 const Expense = require("../models/Expense");
+const cloudinary = require("../config/cloudinary");
 const processRecurringExpenses = async (userId) => {
   const recurringExpenses = await Expense.find({
     user: userId,
@@ -19,6 +20,18 @@ const {
   isRecurring,
   recurringType,
 } = req.body;
+let receiptUrl = "";
+
+if (req.file) {
+  const uploadedImage = await cloudinary.uploader.upload(
+    `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
+    {
+      folder: "expense-receipts",
+    }
+  );
+
+  receiptUrl = uploadedImage.secure_url;
+}
 if (!title || title.trim() === "") {
   return res.status(400).json({
     message: "Please enter an expense name",
@@ -49,6 +62,7 @@ const expense = new Expense({
   title,
   amount,
   category,
+  receipt: receiptUrl,
   isRecurring,
   recurringType,
   user: userId,
@@ -161,11 +175,24 @@ if (expense.user.toString() !== req.user._id.toString()) {
     message: "Unauthorized",
   });
 }
+let receiptUrl = expense.receipt;
+
+if (req.file) {
+  const uploadedImage = await cloudinary.uploader.upload(
+    `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
+    {
+      folder: "expense-receipts",
+    }
+  );
+
+  receiptUrl = uploadedImage.secure_url;
+}
 expense.title = title;
 expense.amount = amount;
 expense.category = category;
 expense.isRecurring = isRecurring;
 expense.recurringType = recurringType;
+expense.receipt = receiptUrl;
 await expense.save();
 res.status(200).json({
   message: "Expense updated successfully",

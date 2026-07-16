@@ -20,6 +20,7 @@ function Dashboard() {
   const [expenseName, setExpenseName] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
+  const [receipt, setReceipt] = useState(null);
   const [isRecurring, setIsRecurring] = useState(false);
 
 const [recurringType, setRecurringType] =
@@ -325,13 +326,17 @@ if (Number(amount) <= 0) {
 }
     try {
       setSaving(true);
-      const expenseData = {
-  title: expenseName,
-  amount: amount,
-  category: category,
-  isRecurring,
-  recurringType,
-};
+      const expenseData = new FormData();
+
+expenseData.append("title", expenseName);
+expenseData.append("amount", amount);
+expenseData.append("category", category);
+expenseData.append("isRecurring", isRecurring);
+expenseData.append("recurringType", recurringType);
+
+if (receipt) {
+  expenseData.append("receipt", receipt);
+}
 
       if (editId) {
         const data = await updateExpense(editId, expenseData);
@@ -410,6 +415,12 @@ setShowForm(false);
   setExpenseName(expense.title);
   setAmount(expense.amount);
   setCategory(expense.category);
+
+  setIsRecurring(expense.isRecurring);
+  setRecurringType(expense.recurringType || "Monthly");
+
+  setReceipt(null);
+
   setEditId(expense._id);
   setShowForm(true);
 
@@ -796,6 +807,8 @@ function handleExportPDF() {
   setAmount={setAmount}
   category={category}
   setCategory={setCategory}
+  receipt={receipt}
+  setReceipt={setReceipt}
   isRecurring={isRecurring}
   setIsRecurring={setIsRecurring}
   recurringType={recurringType}
@@ -899,10 +912,11 @@ function handleExportPDF() {
         <thead>
           <tr>
             <th>Date</th>
-            <th>Time</th>
-            <th>Expense Name</th>
-            <th>Amount</th>
-           <th>Category</th>
+<th>Time</th>
+<th>Expense Name</th>
+<th>Amount</th>
+<th>Category</th>
+<th>Receipt</th>
 <th>Recurring</th>
 <th>Action</th>
           </tr>
@@ -943,6 +957,21 @@ function handleExportPDF() {
                 <td>{expense.title}</td>
                 <td>₹ {expense.amount}</td>
                 <td>{expense.category}</td>
+
+<td>
+  {expense.receipt ? (
+    <a
+      href={expense.receipt}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="view-receipt-btn"
+    >
+      📄 View
+    </a>
+  ) : (
+    "-"
+  )}
+</td>
 
 <td>
   {expense.isRecurring ? (

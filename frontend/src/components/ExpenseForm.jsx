@@ -5,6 +5,8 @@ function ExpenseForm({
   setAmount,
   category,
   setCategory,
+  receipt,
+setReceipt,
   isRecurring,
   setIsRecurring,
   recurringType,
@@ -76,6 +78,23 @@ function ExpenseForm({
     <option value="Yearly">Yearly</option>
   </select>
 )}
+<div style={{ margin: "15px 0" }}>
+  <label
+    style={{
+      display: "block",
+      marginBottom: "8px",
+      fontWeight: "bold",
+    }}
+  >
+    Upload Receipt (Optional)
+  </label>
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={(e) => setReceipt(e.target.files[0])}
+  />
+</div>
 <button
   className="save-btn"
   onClick={handleSaveExpense}

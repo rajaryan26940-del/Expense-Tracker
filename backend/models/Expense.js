@@ -38,6 +38,10 @@ lastProcessed: {
       ref: "User",
       required: true,
     },
+    receipt: {
+  type: String,
+  default: "",
+},
   },
   {
     timestamps: true,

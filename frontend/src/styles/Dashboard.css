@@ -357,3 +357,18 @@ button:active {
   font-size: 14px;
   font-weight: bold;
 }
+.view-receipt-btn {
+  display: inline-block;
+  background: #2563eb;
+  color: white;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.view-receipt-btn:hover {
+  background: #1d4ed8;
+}

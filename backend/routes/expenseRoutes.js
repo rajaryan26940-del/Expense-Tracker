@@ -7,11 +7,22 @@ const {
   deleteExpense,
   updateExpense,
 } = require("../controllers/expenseController");
+const upload = require("../config/multer");
 const { protect } = require("../middleware/authMiddleware");
 
-router.post("/add", protect, addExpense);
+router.post(
+  "/add",
+  protect,
+  upload.single("receipt"),
+  addExpense
+);
 router.get("/", protect, getExpenses);
 router.delete("/:id", protect, deleteExpense);
-router.put("/:id", protect, updateExpense);
+router.put(
+  "/:id",
+  protect,
+  upload.single("receipt"),
+  updateExpense
+);
 
 module.exports = router;
