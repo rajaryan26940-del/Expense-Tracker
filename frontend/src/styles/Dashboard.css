@@ -113,16 +113,38 @@
   padding: 20px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  min-height: 190px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  transition: all 0.25s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
 }
 .card h3 {
-  margin-bottom: 10px;
   color: #3f5fe0;
+  margin-bottom: 10px;
+
+  min-height: 60px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
 }
 
 .card p {
-  font-size: 24px;
-  font-weight: bold;
+  font-size: 20px;
+  font-weight: 700;
   color: #222;
+  margin: 10px 0;
 }
 .theme-btn {
   padding: 10px 20px;
@@ -371,4 +393,17 @@ button:active {
 
 .view-receipt-btn:hover {
   background: #1d4ed8;
+}
+.income-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.income-actions .edit-btn,
+.income-actions .delete-btn {
+  min-width: 70px;
+  padding: 6px 10px;
+  margin: 0;
 }

@@ -1,7 +1,10 @@
+import { toast } from "react-toastify";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import ExpenseForm from "../components/ExpenseForm";
+import IncomeForm from "../components/IncomeForm";
+import IncomeTable from "../components/IncomeTable";
 import ExpenseChart from "../components/ExpenseChart";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -12,6 +15,12 @@ import {
   deleteExpense,
   updateExpense,
 } from "../services/expenseService";
+import {
+  addIncome,
+  getIncome,
+  updateIncome,
+  deleteIncome,
+} from "../services/incomeService";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -20,6 +29,13 @@ function Dashboard() {
   const [expenseName, setExpenseName] = useState("");
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("Food");
+  const [incomeTitle, setIncomeTitle] = useState("");
+const [incomeAmount, setIncomeAmount] = useState("");
+const [incomeSource, setIncomeSource] = useState("");
+
+const [incomeList, setIncomeList] = useState([]);
+
+const [incomeEditId, setIncomeEditId] = useState(null);
   const [receipt, setReceipt] = useState(null);
   const [isRecurring, setIsRecurring] = useState(false);
 
@@ -43,6 +59,7 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
  const [darkMode, setDarkMode] = useState(
   localStorage.getItem("darkMode") === "true");
   const [showForm, setShowForm] = useState(false);
+  const [activeForm, setActiveForm] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   function handleThemeToggle() {
   const newDarkMode = !darkMode;
@@ -62,7 +79,7 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
   localStorage.removeItem("token");
   localStorage.removeItem("name");
 
-  alert("Logout Successful!");
+  toast.success("Logout Successful!");
 
   navigate("/");
 }
@@ -71,6 +88,7 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
       try {
         const data = await getExpenses();
         setExpenses(data.expenses);
+        await loadIncome();
       } catch (error) {
         console.log(error);
       } finally {
@@ -140,7 +158,12 @@ useEffect(() => {
     (total, expense) => total + Number(expense.amount),
     0
   );
-
+  const totalIncome = incomeList.reduce(
+  (total, income) => total + Number(income.amount),
+  0
+);
+const remainingBalance =
+  totalIncome - totalExpense;
   const totalEntries = filteredExpenses.length;
 
   const highestExpense =
@@ -163,12 +186,20 @@ useEffect(() => {
   totalEntries > 0
     ? Math.round(totalExpense / totalEntries)
     : 0;
-    const remainingBudget = monthlyBudget - totalExpense;
+   const remainingBudget = monthlyBudget - totalExpense;
+   const budgetUsedPercentage =
+  monthlyBudget > 0
+    ? Math.min((totalExpense / monthlyBudget) * 100, 100)
+    : 0;
 
-const budgetUsedPercentage = Math.min(
-  (totalExpense / monthlyBudget) * 100,
-  100
-);
+const budgetStatusColor =
+  budgetUsedPercentage < 70
+    ? "#16a34a"
+    : budgetUsedPercentage < 100
+    ? "#f59e0b"
+    : "#ef4444";
+
+
 const categoryTotals = {};
 
 filteredExpenses.forEach((expense) => {
@@ -313,15 +344,15 @@ Object.entries(dailyTotals).forEach(
 
   async function handleSaveExpense() {
   if (expenseName.trim() === "") {
-  alert("Please enter Expense Name");
+  toast.warning("Please enter Expense Name");
   return;
 }
     if (String(amount).trim() === "") {
-      alert("Please enter Amount");
+      toast.warning("Please enter Amount");
       return;
     }
 if (Number(amount) <= 0) {
-  alert("Amount must be greater than 0");
+  toast.warning("Amount must be greater than 0");
   return;
 }
     try {
@@ -348,12 +379,12 @@ if (receipt) {
         );
 
         setEditId(null);
-        alert("Expense updated successfully!");
+        toast.success("Expense updated successfully!");
       } else {
         const data = await addExpense(expenseData);
 
         setExpenses([data.expense, ...expenses]);
-        alert("Expense added successfully!");
+        toast.success("Expense added successfully!");
       }
 
      setExpenseName("");
@@ -389,17 +420,84 @@ setShowForm(false);
     setExpenses(
       expenses.filter((expense) => expense._id !== id)
     );
-    alert("Expense deleted successfully!");
+  toast.success("Expense deleted successfully!");
     
   } catch (error) {
     console.log(error);
-    alert(
-      error.response?.data?.message ||
-        "Failed to delete expense"
-    );
+    toast.error(
+  error.response?.data?.message ||
+    "Failed to delete expense"
+);
   } finally {
   setDeletingId(null);
 }
+}
+async function handleDeleteIncome(id) {
+  try {
+    const confirmDelete = window.confirm(
+  "Are you sure you want to delete this income?"
+);
+
+if (!confirmDelete) {
+  return;
+}
+    await deleteIncome(id);
+
+    setIncomeList(
+      incomeList.filter((income) => income._id !== id)
+    );
+
+    toast.success("Income deleted successfully!");
+  } catch (error) {
+    console.log(error);
+
+    alert(
+      error.response?.data?.message ||
+        "Failed to delete income"
+    );
+  }
+}
+async function loadIncome() {
+  try {
+    const data = await getIncome();
+    setIncomeList(data.income);
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function handleSaveIncome() {
+  try {
+    if (incomeEditId) {
+      await updateIncome(incomeEditId, {
+        title: incomeTitle,
+        amount: incomeAmount,
+        source: incomeSource,
+      });
+
+      toast.success("Income updated successfully");
+    } else {
+      await addIncome({
+        title: incomeTitle,
+        amount: incomeAmount,
+        source: incomeSource,
+      });
+toast.success("Income added successfully");
+    }
+
+   await loadIncome();
+    setIncomeTitle("");
+    setIncomeAmount("");
+    setIncomeSource("");
+
+    setIncomeEditId(null);
+  } catch (error) {
+    console.log(error);
+
+    toast.error(
+  error.response?.data?.message ||
+    "Something went wrong"
+);
+  }
 }
   function handleEditExpense(expense) {
   if (editId && editId !== expense._id) {
@@ -422,6 +520,35 @@ setShowForm(false);
   setReceipt(null);
 
   setEditId(expense._id);
+  setShowForm(true);
+
+  setTimeout(() => {
+    formRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, 0);
+}
+function handleEditIncome(income) {
+  if (
+  incomeEditId &&
+  incomeEditId !== income._id
+) {
+  const confirmSwitch = window.confirm(
+    "You have unsaved changes. Are you sure you want to edit another income?"
+  );
+
+  if (!confirmSwitch) {
+    return;
+  }
+}
+  setIncomeTitle(income.title);
+  setIncomeAmount(income.amount);
+  setIncomeSource(income.source);
+
+  setIncomeEditId(income._id);
+
+  setActiveForm("income");
   setShowForm(true);
 
   setTimeout(() => {
@@ -576,109 +703,145 @@ function handleExportPDF() {
     <div className="summary-cards">
   <div className="card">
     <h3>Total Expense</h3>
-    <p>₹ {totalExpense}</p>
+    <p>₹ {totalExpense.toLocaleString("en-IN")}</p>
   </div>
+    <div className="card">
+  <h3>Total Income</h3>
 
+  <p
+    style={{
+      color: "#16a34a",
+    }}
+  >
+    ₹ {totalIncome.toLocaleString("en-IN")}
+  </p>
+</div>
+<div className="card">
+  <h3>Remaining Balance</h3>
+
+  <p
+    style={{
+      color:
+        remainingBalance >= 0
+          ? "#16a34a"
+          : "#dc2626",
+    }}
+  >
+    ₹ {remainingBalance.toLocaleString("en-IN")}
+  </p>
+</div>
   <div className="card">
     <h3>Total Entries</h3>
     <p>{totalEntries}</p>
   </div>
 
   <div className="card">
-    <h3>Highest Expense</h3>
-    <p>₹ {highestExpense}</p>
-  </div>
+  <h3>Highest Expense</h3>
+
+  <p>
+    ₹ {highestExpense.toLocaleString("en-IN")}
+  </p>
+</div>
   <div className="card">
   <h3>Lowest Expense</h3>
-  <p>₹ {lowestExpense}</p>
+  <p>₹ {lowestExpense.toLocaleString("en-IN")}</p>
 </div>
 <div className="card">
   <h3>Most Expensive Category</h3>
 
-  <p>{topCategory}</p>
+  <div
+  style={{
+    fontSize: "18px",
+    fontWeight: "500",
+    marginBottom: "8px",
+  }}
+>
+  {topCategory}
+</div>
 
-  <small
-    style={{
-      display: "block",
-      marginTop: "8px",
-      fontSize: "16px",
-      color: "#666",
-    }}
-  >
-    ₹ {topCategoryAmount}
-  </small>
+<p>₹ {topCategoryAmount.toLocaleString("en-IN")}</p>
 </div>
 <div className="card">
   <h3>This Month's Spending</h3>
 
-  <p>₹ {thisMonthExpense}</p>
+  <p
+    style={{
+      marginTop:  "28px",
+    }}
+  >
+    ₹ {thisMonthExpense.toLocaleString("en-IN")}
+  </p>
 </div>
 <div className="card">
   <h3>Highest Spending Day</h3>
 
-  <p>{highestSpendingDay}</p>
+ <div
+  style={{
+    fontSize: "18px",
+    fontWeight: "500",
+    marginBottom: "8px",
+  }}
+>
+  {highestSpendingDay}
+</div>
 
-  <small
-    style={{
-      display: "block",
-      marginTop: "8px",
-      fontSize: "16px",
-      color: "#666",
-    }}
-  >
-    ₹ {highestDayAmount}
-  </small>
+<p>₹ {highestDayAmount.toLocaleString("en-IN")}</p>
 </div>
 <div className="card">
   <h3>Last Month vs This Month</h3>
 
-  <p>₹ {thisMonthExpense}</p>
+  <p>₹ {thisMonthExpense.toLocaleString("en-IN")}</p>
 
+<small>
+  Last Month: ₹ {lastMonthExpense.toLocaleString("en-IN")}
+</small>
   <small
     style={{
-      display: "block",
-      marginTop: "8px",
-      fontSize: "16px",
-      color: "#666",
-    }}
-  >
-    Last: ₹ {lastMonthExpense}
-  </small>
-
-  <small
-    style={{
-      display: "block",
-      marginTop: "8px",
-      fontSize: "16px",
-      fontWeight: "bold",
       color:
         expenseTrend === "Increase"
           ? "#dc2626"
           : "#16a34a",
+      fontWeight: "600",
     }}
   >
     {expenseTrend === "Increase"
       ? "📈 Increased"
-      : "📉 Decreased"}
-
-    {" "}₹ {Math.abs(expenseDifference)}
+      : "📉 Decreased"}{" "}
+    ₹ {Math.abs(expenseDifference).toLocaleString("en-IN")}
   </small>
 </div>
 <div className="card">
   <h3>Average Daily Spending</h3>
-
-  <p>₹ {averageDailySpending}</p>
+<p>₹ {averageDailySpending.toLocaleString("en-IN")}</p>
 
   <small
-    style={{
-      display: "block",
-      marginTop: "8px",
-      fontSize: "16px",
-      color: "#666",
-    }}
-  >
-    Per Day
-  </small>
+  style={{
+    display: "block",
+    marginTop: "6px",
+    fontSize: "16px",
+    fontWeight: "500",
+    color: "#555",
+  }}
+>
+  Per Day
+</small>
+</div>
+<div className="card">
+  <h3>Monthly Budget</h3>
+
+<p>₹ {monthlyBudget.toLocaleString("en-IN")}</p>
+
+  <small
+  style={{
+    display: "block",
+    marginTop: "6px",
+    fontSize: "16px",
+    fontWeight: "500",
+    color: "#666",
+  }}
+>
+  Current Budget
+</small>
 </div>
 </div>
 <div className="budget-section">
@@ -698,20 +861,22 @@ function handleExportPDF() {
     </p>
 
     <p>
-      <strong>Used:</strong>{" "}
-      {budgetUsedPercentage.toFixed(1)}%
-    </p>
+  <strong>Used:</strong>{" "}
+  <span
+    style={{
+      fontWeight: "700",
+      color: budgetStatusColor,
+    }}
+  >
+    {budgetUsedPercentage.toFixed(1)}%
+  </span>
+</p>
     <div className="budget-progress">
   <div
   className="budget-progress-fill"
   style={{
     width: `${budgetUsedPercentage}%`,
-    backgroundColor:
-      budgetUsedPercentage < 70
-        ? "#22c55e"
-        : budgetUsedPercentage < 100
-        ? "#f59e0b"
-        : "#ef4444",
+   backgroundColor: budgetStatusColor,
   }}
 ></div>
 </div>
@@ -740,7 +905,7 @@ function handleExportPDF() {
         localStorage.setItem("monthlyBudget", budget);
         setEditingBudget(false);
 
-        alert("Monthly budget updated successfully!");
+        toast.success("Monthly budget updated successfully!");
       }}
     >
       Save Budget
@@ -793,12 +958,30 @@ function handleExportPDF() {
   averageExpense={averageExpense}
 />
 
-<button onClick={handleToggleForm}>
+<button 
+onClick={() => {
+  setActiveForm("expense");
+  handleToggleForm();
+}}
+>
   {showForm ? "Close Form" : "Add Expense"}
+</button>
+<button
+  onClick={() => {
+    setIncomeTitle("");
+    setIncomeAmount("");
+    setIncomeSource("");
+
+    setIncomeEditId(null);
+setActiveForm("income");
+setShowForm(true);
+  }}
+>
+  Add Income
 </button>
 
       <hr />
-{showForm && (
+  {showForm && activeForm === "expense" && (
   <div ref={formRef}>
     <ExpenseForm
   expenseName={expenseName}
@@ -821,8 +1004,26 @@ function handleExportPDF() {
   </div>
 )}
 
+{showForm && activeForm === "income" && (
+  <div ref={formRef}>
+    <IncomeForm
+      incomeTitle={incomeTitle}
+      setIncomeTitle={setIncomeTitle}
+      incomeAmount={incomeAmount}
+      setIncomeAmount={setIncomeAmount}
+      incomeSource={incomeSource}
+      setIncomeSource={setIncomeSource}
+      handleSaveIncome={handleSaveIncome}
+      incomeEditId={incomeEditId}
+    />
+  </div>
+)}
       <hr />
-
+     <IncomeTable
+  incomeList={incomeList}
+  handleEditIncome={handleEditIncome}
+  handleDeleteIncome={handleDeleteIncome}
+/>
       <h2>Recent Expenses</h2>
      <div className="export-buttons">
   <button onClick={handleExportExcel}>
