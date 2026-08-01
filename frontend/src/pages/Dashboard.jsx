@@ -21,7 +21,23 @@ import {
   updateIncome,
   deleteIncome,
 } from "../services/incomeService";
-
+import {
+  LayoutDashboard,
+  Receipt,
+  IndianRupee,
+  PiggyBank,
+  BarChart3,
+  FolderTree,
+  Settings,
+  Moon,
+  Bell,
+  LogOut,
+  TrendingUp,
+  ArrowUp,
+  ArrowDown,
+  Tag,
+  ListChecks,
+} from "lucide-react";
 function Dashboard() {
   const navigate = useNavigate();
   const formRef = useRef(null);
@@ -61,6 +77,19 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
   const [showForm, setShowForm] = useState(false);
   const [activeForm, setActiveForm] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const notifRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setShowNotifications(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   function handleThemeToggle() {
   const newDarkMode = !darkMode;
 
@@ -673,39 +702,136 @@ function handleExportPDF() {
   doc.save("expenses.pdf");
 }
   return (
-    <div
-      className={`dashboard-container ${
-        darkMode ? "dark-mode" : "light-mode"
-      }`}
-    >
-      <h1 className="dashboard-title">
-        Expense Tracker Dashboard
-      </h1>
+  <div
+    className={`dashboard-container ${
+      darkMode ? "dark-mode" : "light-mode"
+    }`}
+  >
+    <div className="dashboard-layout">
+      <aside className="dashboard-sidebar">
+  <div className="sidebar-logo-row">
+    <div className="sidebar-logo-icon">
+      <LayoutDashboard size={18} />
+    </div>
+    <span className="sidebar-logo">Expense Tracker</span>
+  </div>
 
-      <h2 className="dashboard-title">
-  Welcome {localStorage.getItem("name")}
-</h2>
+  <nav className="sidebar-menu">
+  <button className="sidebar-item active">
+    <LayoutDashboard size={20} />
+    <span>Dashboard</span>
+  </button>
 
-      <button
-        className="logout-btn"
-        onClick={handleLogout}
-      >
-        Logout
-      </button>
+  <button className="sidebar-item">
+    <Receipt size={20} />
+    <span>Expenses</span>
+  </button>
 
-      <button
-        className="theme-btn"
-        onClick={handleThemeToggle}
-      >
-        {darkMode ? "🌞 Light Mode" : "🌑 Dark Mode"}
-      </button>
+  <button className="sidebar-item">
+    <IndianRupee size={20} />
+    <span>Income</span>
+  </button>
+
+  <button className="sidebar-item">
+    <PiggyBank size={20} />
+    <span>Budget</span>
+  </button>
+
+  <button className="sidebar-item">
+    <BarChart3 size={20} />
+    <span>Analytics</span>
+  </button>
+</nav>
+
+<div className="sidebar-bottom">
+  <div className="profile-card">
+    <div className="profile-avatar">
+      {(localStorage.getItem("name") || "U").charAt(0).toUpperCase()}
+    </div>
+    <div className="profile-info">
+      <p className="profile-name">{localStorage.getItem("name")}</p>
+      <span className="profile-link">View Profile</span>
+    </div>
+  </div>
+
+  <div className="dark-mode-row">
+    <span>Dark Mode</span>
+    <label className="switch">
+      <input
+        type="checkbox"
+        checked={darkMode}
+        onChange={handleThemeToggle}
+      />
+      <span className="slider" />
+    </label>
+  </div>
+</div>
+</aside>
+
+      <main className="dashboard-main">
+      <div className="top-header">
+        <div>
+          <h1 className="page-title">Expense Tracker Dashboard</h1>
+          <p className="page-subtitle">Track your income, expenses and budget in one place.</p>
+        </div>
+
+        <div className="header-actions">
+          <button className="header-icon-btn" onClick={handleThemeToggle} aria-label="Toggle dark mode">
+            <Moon size={18} />
+          </button>
+
+          <div className="notif-wrapper" ref={notifRef}>
+            <button className="header-icon-btn" onClick={() => setShowNotifications((p) => !p)} aria-label="Notifications">
+              <Bell size={18} />
+              <span className="notif-dot" />
+            </button>
+
+            {showNotifications && (
+              <div className="notif-dropdown">
+                <div className="notif-header">
+                  <span>Notifications</span>
+                  <button className="notif-mark-read">Mark all as read</button>
+                </div>
+                <div className="notif-item">
+                  <p className="notif-title">Budget Alert</p>
+                  <p className="notif-text">You've used {budgetUsedPercentage.toFixed(0)}% of your monthly budget.</p>
+                </div>
+                <a className="notif-view-all" href="#">View all notifications</a>
+              </div>
+            )}
+          </div>
+
+          <button className="header-icon-btn logout-icon-btn" onClick={handleLogout} aria-label="Logout">
+            <LogOut size={18} />
+          </button>
+        </div>
+      </div>
+
+      <div className="welcome-row">
+        <p className="welcome-text">
+          Welcome back, <span className="welcome-name">{localStorage.getItem("name")}</span> 👋
+        </p>
+        <div className="action-buttons">
+          <button className="btn-primary" onClick={() => { setActiveForm("expense"); handleToggleForm(); }}>
+            + {showForm && activeForm === "expense" ? "Close Form" : "Add Expense"}
+          </button>
+          <button className="btn-success" onClick={() => {
+            setIncomeTitle(""); setIncomeAmount(""); setIncomeSource("");
+            setIncomeEditId(null); setActiveForm("income"); setShowForm(true);
+          }}>
+            + Add Income
+          </button>
+        </div>
+      </div>
 
     <div className="summary-cards">
   <div className="card">
+    <div className="card-icon icon-red"><Receipt size={18} /></div>
     <h3>Total Expense</h3>
     <p>₹ {totalExpense.toLocaleString("en-IN")}</p>
   </div>
     <div className="card">
+    <div className="card-icon icon-green"><IndianRupee size={18} /></div>
   <h3>Total Income</h3>
 
   <p
@@ -717,6 +843,7 @@ function handleExportPDF() {
   </p>
 </div>
 <div className="card">
+    <div className="card-icon icon-red"><PiggyBank size={18} /></div>
   <h3>Remaining Balance</h3>
 
   <p
@@ -731,11 +858,13 @@ function handleExportPDF() {
   </p>
 </div>
   <div className="card">
+    <div className="card-icon icon-purple"><ListChecks size={18} /></div>
     <h3>Total Entries</h3>
     <p>{totalEntries}</p>
   </div>
 
   <div className="card">
+    <div className="card-icon icon-amber"><TrendingUp size={18} /></div>
   <h3>Highest Expense</h3>
 
   <p>
@@ -743,10 +872,12 @@ function handleExportPDF() {
   </p>
 </div>
   <div className="card">
+    <div className="card-icon icon-green"><ArrowDown size={18} /></div>
   <h3>Lowest Expense</h3>
   <p>₹ {lowestExpense.toLocaleString("en-IN")}</p>
 </div>
 <div className="card">
+  <div className="card-icon icon-red"><Tag size={18} /></div>
   <h3>Most Expensive Category</h3>
 
   <div
@@ -762,6 +893,7 @@ function handleExportPDF() {
 <p>₹ {topCategoryAmount.toLocaleString("en-IN")}</p>
 </div>
 <div className="card">
+  <div className="card-icon icon-purple"><BarChart3 size={18} /></div>
   <h3>This Month's Spending</h3>
 
   <p
@@ -773,6 +905,7 @@ function handleExportPDF() {
   </p>
 </div>
 <div className="card">
+  <div className="card-icon icon-amber"><TrendingUp size={18} /></div>
   <h3>Highest Spending Day</h3>
 
  <div
@@ -788,6 +921,9 @@ function handleExportPDF() {
 <p>₹ {highestDayAmount.toLocaleString("en-IN")}</p>
 </div>
 <div className="card">
+  <div className={`card-icon ${expenseTrend === "Increase" ? "icon-red" : "icon-green"}`}>
+    {expenseTrend === "Increase" ? <ArrowUp size={18} /> : <ArrowDown size={18} />}
+  </div>
   <h3>Last Month vs This Month</h3>
 
   <p>₹ {thisMonthExpense.toLocaleString("en-IN")}</p>
@@ -811,6 +947,7 @@ function handleExportPDF() {
   </small>
 </div>
 <div className="card">
+  <div className="card-icon icon-purple"><BarChart3 size={18} /></div>
   <h3>Average Daily Spending</h3>
 <p>₹ {averageDailySpending.toLocaleString("en-IN")}</p>
 
@@ -827,6 +964,7 @@ function handleExportPDF() {
 </small>
 </div>
 <div className="card">
+  <div className="card-icon icon-green"><PiggyBank size={18} /></div>
   <h3>Monthly Budget</h3>
 
 <p>₹ {monthlyBudget.toLocaleString("en-IN")}</p>
@@ -844,6 +982,7 @@ function handleExportPDF() {
 </small>
 </div>
 </div>
+<div className="dashboard-bottom-row">
 <div className="budget-section">
   <h2>Monthly Budget Overview</h2>
 
@@ -953,32 +1092,13 @@ function handleExportPDF() {
   </div>
 </div>
 
-<ExpenseChart
-  expenses={expenses}
-  averageExpense={averageExpense}
-/>
-
-<button 
-onClick={() => {
-  setActiveForm("expense");
-  handleToggleForm();
-}}
->
-  {showForm ? "Close Form" : "Add Expense"}
-</button>
-<button
-  onClick={() => {
-    setIncomeTitle("");
-    setIncomeAmount("");
-    setIncomeSource("");
-
-    setIncomeEditId(null);
-setActiveForm("income");
-setShowForm(true);
-  }}
->
-  Add Income
-</button>
+<div className="expense-chart-wrapper">
+  <ExpenseChart
+    expenses={expenses}
+    averageExpense={averageExpense}
+  />
+</div>
+</div>
 
       <hr />
   {showForm && activeForm === "expense" && (
@@ -1126,13 +1246,13 @@ setShowForm(true);
         <tbody>
           {loading ? (
             <tr>
-              <td colSpan="6">
+              <td colSpan="8">
                 Loading expenses...
               </td>
             </tr>
           ) : filteredExpenses.length === 0 ? (
             <tr>
-              <td colSpan="6">
+              <td colSpan="8">
   {expenses.length === 0
     ? "No expenses found."
     : "No matching expenses found."}
@@ -1157,7 +1277,11 @@ setShowForm(true);
 
                 <td>{expense.title}</td>
                 <td>₹ {expense.amount}</td>
-                <td>{expense.category}</td>
+                <td>
+                  <span className={`category-pill cat-${expense.category?.toLowerCase()}`}>
+                    {expense.category}
+                  </span>
+                </td>
 
 <td>
   {expense.receipt ? (
@@ -1216,8 +1340,10 @@ setShowForm(true);
 <h2 className="total-expense">
   Total Expense: ₹ {totalExpense}
 </h2>
+            </main>
     </div>
-  );
+  </div>
+);
 }
 
 export default Dashboard;
