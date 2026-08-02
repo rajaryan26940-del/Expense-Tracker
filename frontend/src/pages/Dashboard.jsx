@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
+import ConfirmModal from "../components/ConfirmModal";
 import ExpenseForm from "../components/ExpenseForm";
 import IncomeForm from "../components/IncomeForm";
 import IncomeTable from "../components/IncomeTable";
@@ -80,6 +81,30 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef(null);
 
+  const [confirmState, setConfirmState] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    confirmText: "Confirm",
+    confirmButtonClass: "confirm-btn",
+    onConfirmAction: null,
+  });
+
+  function openConfirm({ title, message, confirmText, confirmButtonClass, onConfirmAction }) {
+    setConfirmState({
+      isOpen: true,
+      title,
+      message,
+      confirmText: confirmText || "Confirm",
+      confirmButtonClass: confirmButtonClass || "confirm-btn",
+      onConfirmAction,
+    });
+  }
+
+  function closeConfirm() {
+    setConfirmState((s) => ({ ...s, isOpen: false }));
+  }
+
   useEffect(() => {
     function handleClickOutside(event) {
       if (notifRef.current && !notifRef.current.contains(event.target)) {
@@ -97,20 +122,19 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
   localStorage.setItem("darkMode", newDarkMode);
 }
   function handleLogout() {
-  const confirmLogout = window.confirm(
-    "Are you sure you want to logout?"
-  );
+  openConfirm({
+    title: "Logout",
+    message: "Are you sure you want to logout?",
+    confirmText: "Logout",
+    onConfirmAction: () => {
+      localStorage.removeItem("token");
+      localStorage.removeItem("name");
 
-  if (!confirmLogout) {
-    return;
-  }
+      toast.success("Logout Successful!");
 
-  localStorage.removeItem("token");
-  localStorage.removeItem("name");
-
-  toast.success("Logout Successful!");
-
-  navigate("/");
+      navigate("/");
+    },
+  });
 }
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -338,37 +362,41 @@ Object.entries(dailyTotals).forEach(
   setSortOption("latest");
 }
      function handleToggleForm() {
-  if (showForm && editId) {
-    const confirmClose = window.confirm(
-      "Are you sure you want to close editing?"
-    );
-
-    if (!confirmClose) {
-      return;
+  const closeAndReset = () => {
+    if (showForm) {
+      setExpenseName("");
+      setAmount("");
+      setCategory("Food");
+      setEditId(null);
     }
-  }
-  if (
-  showForm &&
-  !editId &&
-  (expenseName.trim() !== "" || amount.trim() !== "")
-) {
-  const confirmClose = window.confirm(
-    "Are you sure you want to discard this expense?"
-  );
+    setShowForm(!showForm);
+  };
 
-  if (!confirmClose) {
+  if (showForm && editId) {
+    openConfirm({
+      title: "Close Editing",
+      message: "Are you sure you want to close editing?",
+      confirmText: "Close",
+      onConfirmAction: closeAndReset,
+    });
     return;
   }
-}
 
-  if (showForm) {
-    setExpenseName("");
-    setAmount("");
-    setCategory("Food");
-    setEditId(null);
+  if (
+    showForm &&
+    !editId &&
+    (expenseName.trim() !== "" || amount.trim() !== "")
+  ) {
+    openConfirm({
+      title: "Discard Expense",
+      message: "Are you sure you want to discard this expense?",
+      confirmText: "Discard",
+      onConfirmAction: closeAndReset,
+    });
+    return;
   }
 
-  setShowForm(!showForm);
+  closeAndReset();
 }
 
   async function handleSaveExpense() {
@@ -424,7 +452,7 @@ setRecurringType("Monthly");
 setShowForm(false);
     } catch (error) {
   console.log(error);
-  alert(
+  toast.error(
     error.response?.data?.message ||
       "Failed to save expense"
   );
@@ -434,57 +462,56 @@ setShowForm(false);
   }
 
   async function handleDeleteExpense(id) {
-  const confirmDelete = window.confirm(
-    "Are you sure you want to delete this expense?"
-  );
+  openConfirm({
+    title: "Delete Expense",
+    message: "Are you sure you want to delete this expense?",
+    confirmText: "Delete",
+    confirmButtonClass: "confirm-btn",
+    onConfirmAction: async () => {
+      try {
+        setDeletingId(id);
+        await deleteExpense(id);
 
-  if (!confirmDelete) {
-    return;
-  }
-
-  try {
-    setDeletingId(id);
-    await deleteExpense(id);
-
-    setExpenses(
-      expenses.filter((expense) => expense._id !== id)
-    );
-  toast.success("Expense deleted successfully!");
-    
-  } catch (error) {
-    console.log(error);
-    toast.error(
-  error.response?.data?.message ||
-    "Failed to delete expense"
-);
-  } finally {
-  setDeletingId(null);
-}
+        setExpenses(
+          expenses.filter((expense) => expense._id !== id)
+        );
+        toast.success("Expense deleted successfully!");
+      } catch (error) {
+        console.log(error);
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to delete expense"
+        );
+      } finally {
+        setDeletingId(null);
+      }
+    },
+  });
 }
 async function handleDeleteIncome(id) {
-  try {
-    const confirmDelete = window.confirm(
-  "Are you sure you want to delete this income?"
-);
+  openConfirm({
+    title: "Delete Income",
+    message: "Are you sure you want to delete this income?",
+    confirmText: "Delete",
+    confirmButtonClass: "confirm-btn",
+    onConfirmAction: async () => {
+      try {
+        await deleteIncome(id);
 
-if (!confirmDelete) {
-  return;
-}
-    await deleteIncome(id);
+        setIncomeList(
+          incomeList.filter((income) => income._id !== id)
+        );
 
-    setIncomeList(
-      incomeList.filter((income) => income._id !== id)
-    );
-
-    toast.success("Income deleted successfully!");
-  } catch (error) {
-    console.log(error);
-
-    alert(
-      error.response?.data?.message ||
-        "Failed to delete income"
-    );
-  }
+        toast.success("Income deleted successfully!");
+      } catch (error) {
+        console.log(error);
+        toast.error(
+          error.response?.data?.message ||
+            "Failed to delete income"
+        );
+      }
+    },
+  });
 }
 async function loadIncome() {
   try {
@@ -529,85 +556,92 @@ toast.success("Income added successfully");
   }
 }
   function handleEditExpense(expense) {
+  const loadExpenseIntoForm = () => {
+    setExpenseName(expense.title);
+    setAmount(expense.amount);
+    setCategory(expense.category);
+
+    setIsRecurring(expense.isRecurring);
+    setRecurringType(expense.recurringType || "Monthly");
+
+    setReceipt(null);
+
+    setEditId(expense._id);
+    setShowForm(true);
+
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
   if (editId && editId !== expense._id) {
-    const confirmSwitch = window.confirm(
-      "You have unsaved changes. Are you sure you want to edit another expense?"
-    );
-
-    if (!confirmSwitch) {
-      return;
-    }
-  }
-
-  setExpenseName(expense.title);
-  setAmount(expense.amount);
-  setCategory(expense.category);
-
-  setIsRecurring(expense.isRecurring);
-  setRecurringType(expense.recurringType || "Monthly");
-
-  setReceipt(null);
-
-  setEditId(expense._id);
-  setShowForm(true);
-
-  setTimeout(() => {
-    formRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
+    openConfirm({
+      title: "Unsaved Changes",
+      message:
+        "You have unsaved changes. Are you sure you want to edit another expense?",
+      confirmText: "Yes, Switch",
+      onConfirmAction: loadExpenseIntoForm,
     });
-  }, 0);
-}
-function handleEditIncome(income) {
-  if (
-  incomeEditId &&
-  incomeEditId !== income._id
-) {
-  const confirmSwitch = window.confirm(
-    "You have unsaved changes. Are you sure you want to edit another income?"
-  );
-
-  if (!confirmSwitch) {
     return;
   }
+
+  loadExpenseIntoForm();
 }
-  setIncomeTitle(income.title);
-  setIncomeAmount(income.amount);
-  setIncomeSource(income.source);
+function handleEditIncome(income) {
+  const loadIncomeIntoForm = () => {
+    setIncomeTitle(income.title);
+    setIncomeAmount(income.amount);
+    setIncomeSource(income.source);
 
-  setIncomeEditId(income._id);
+    setIncomeEditId(income._id);
 
-  setActiveForm("income");
-  setShowForm(true);
+    setActiveForm("income");
+    setShowForm(true);
 
-  setTimeout(() => {
-    formRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
+    setTimeout(() => {
+      formRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
+  };
+
+  if (incomeEditId && incomeEditId !== income._id) {
+    openConfirm({
+      title: "Unsaved Changes",
+      message:
+        "You have unsaved changes. Are you sure you want to edit another income?",
+      confirmText: "Yes, Switch",
+      onConfirmAction: loadIncomeIntoForm,
     });
-  }, 0);
+    return;
+  }
+
+  loadIncomeIntoForm();
 }
 
  function handleCancelEdit() {
-  const confirmCancel = window.confirm(
-    "Are you sure you want to cancel editing?"
-  );
-
-  if (!confirmCancel) {
-    return;
-  }
-
- setExpenseName("");
-setAmount("");
-setCategory("Food");
-setIsRecurring(false);
-setRecurringType("Monthly");
-setEditId(null);
-setShowForm(false);
+  openConfirm({
+    title: "Cancel Editing",
+    message: "Are you sure you want to cancel editing?",
+    confirmText: "Yes, Cancel",
+    onConfirmAction: () => {
+      setExpenseName("");
+      setAmount("");
+      setCategory("Food");
+      setIsRecurring(false);
+      setRecurringType("Monthly");
+      setEditId(null);
+      setShowForm(false);
+    },
+  });
 }
 function handleExportExcel() {
   if (filteredExpenses.length === 0) {
-    alert("No expenses available to export.");
+    toast.warning("No expenses available to export.");
     return;
   }
 
@@ -647,7 +681,7 @@ const workbook = XLSX.utils.book_new();
 }
 function handleExportPDF() {
   if (filteredExpenses.length === 0) {
-    alert("No expenses available to export.");
+    toast.warning("No expenses available to export.");
     return;
   }
 
@@ -1035,7 +1069,7 @@ function handleExportPDF() {
         const budget = Number(budgetInput);
 
         if (isNaN(budget) || budget <= 0) {
-          alert("Please enter a valid budget greater than 0.");
+          toast.warning("Please enter a valid budget greater than 0.");
           return;
         }
 
@@ -1340,10 +1374,23 @@ function handleExportPDF() {
 <h2 className="total-expense">
   Total Expense: ₹ {totalExpense}
 </h2>
-            </main>
+           </main>
+      </div>
+
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmText={confirmState.confirmText}
+        confirmButtonClass={confirmState.confirmButtonClass}
+        onConfirm={() => {
+          confirmState.onConfirmAction?.();
+          closeConfirm();
+        }}
+        onCancel={closeConfirm}
+      />
     </div>
-  </div>
-);
+  );
 }
 
 export default Dashboard;
