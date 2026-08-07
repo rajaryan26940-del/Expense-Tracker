@@ -9,11 +9,10 @@ function IncomeTable({
         Recent Income
       </h2>
 
-      <table className="dashboard-table">
+      <table className="dashboard-table recent-table">
         <thead>
          <tr>
   <th>Date</th>
-  <th>Time</th>
   <th>Title</th>
   <th>Amount</th>
   <th>Source</th>
@@ -24,7 +23,7 @@ function IncomeTable({
         <tbody>
   {incomeList.length === 0 ? (
     <tr>
-      <td colSpan="6">
+      <td colSpan="5">
         No income found.
       </td>
     </tr>
@@ -35,12 +34,6 @@ function IncomeTable({
           {new Date(
             income.createdAt
           ).toLocaleDateString()}
-        </td>
-
-        <td>
-          {new Date(
-            income.createdAt
-          ).toLocaleTimeString()}
         </td>
 
         <td>{income.title}</td>

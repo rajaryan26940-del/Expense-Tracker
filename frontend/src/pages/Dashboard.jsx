@@ -38,6 +38,8 @@ import {
   ArrowDown,
   Tag,
   ListChecks,
+  FileText,
+  Pencil,
 } from "lucide-react";
 function Dashboard() {
   const navigate = useNavigate();
@@ -79,7 +81,12 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
   const [activeForm, setActiveForm] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(() => {
+    const saved = localStorage.getItem("unreadCount");
+    return saved !== null ? Number(saved) : 1;
+  });
   const notifRef = useRef(null);
+  const [activePage, setActivePage] = useState("Dashboard");
 
   const [confirmState, setConfirmState] = useState({
     isOpen: false,
@@ -751,29 +758,68 @@ function handleExportPDF() {
   </div>
 
   <nav className="sidebar-menu">
-  <button className="sidebar-item active">
+  <button
+    className={`sidebar-item ${activePage === "Dashboard" ? "active" : ""}`}
+    onClick={() => setActivePage("Dashboard")}
+  >
     <LayoutDashboard size={20} />
     <span>Dashboard</span>
   </button>
 
-  <button className="sidebar-item">
+  <button
+    className={`sidebar-item ${activePage === "Expenses" ? "active" : ""}`}
+    onClick={() => setActivePage("Expenses")}
+  >
     <Receipt size={20} />
     <span>Expenses</span>
   </button>
 
-  <button className="sidebar-item">
+  <button
+    className={`sidebar-item ${activePage === "Income" ? "active" : ""}`}
+    onClick={() => setActivePage("Income")}
+  >
     <IndianRupee size={20} />
     <span>Income</span>
   </button>
 
-  <button className="sidebar-item">
+  <button
+    className={`sidebar-item ${activePage === "Budget" ? "active" : ""}`}
+    onClick={() => setActivePage("Budget")}
+  >
     <PiggyBank size={20} />
     <span>Budget</span>
   </button>
 
-  <button className="sidebar-item">
+  <button
+    className={`sidebar-item ${activePage === "Analytics" ? "active" : ""}`}
+    onClick={() => setActivePage("Analytics")}
+  >
     <BarChart3 size={20} />
     <span>Analytics</span>
+  </button>
+
+  <button
+    className={`sidebar-item ${activePage === "Reports" ? "active" : ""}`}
+    onClick={() => setActivePage("Reports")}
+  >
+    <FileText size={20} />
+    <span>Reports</span>
+  </button>
+
+  <button
+    className={`sidebar-item ${activePage === "Categories" ? "active" : ""}`}
+    onClick={() => setActivePage("Categories")}
+  >
+    <FolderTree size={20} />
+    <span>Categories</span>
+  </button>
+
+  <button
+    className={`sidebar-item ${activePage === "Settings" ? "active" : ""}`}
+    onClick={() => setActivePage("Settings")}
+  >
+    <Settings size={20} />
+    <span>Settings</span>
   </button>
 </nav>
 
@@ -817,14 +863,24 @@ function handleExportPDF() {
           <div className="notif-wrapper" ref={notifRef}>
             <button className="header-icon-btn" onClick={() => setShowNotifications((p) => !p)} aria-label="Notifications">
               <Bell size={18} />
-              <span className="notif-dot" />
+              {unreadCount > 0 && (
+                <span className="notif-badge">{unreadCount}</span>
+              )}
             </button>
 
             {showNotifications && (
               <div className="notif-dropdown">
                 <div className="notif-header">
                   <span>Notifications</span>
-                  <button className="notif-mark-read">Mark all as read</button>
+                  <button
+                    className="notif-mark-read"
+                    onClick={() => {
+                      setUnreadCount(0);
+                      localStorage.setItem("unreadCount", 0);
+                    }}
+                  >
+                    Mark all as read
+                  </button>
                 </div>
                 <div className="notif-item">
                   <p className="notif-title">Budget Alert</p>
@@ -858,6 +914,13 @@ function handleExportPDF() {
         </div>
       </div>
 
+    {activePage !== "Dashboard" ? (
+      <div className="coming-soon">
+        <h2>{activePage}</h2>
+        <p>This section is coming soon.</p>
+      </div>
+    ) : (
+    <>
     <div className="summary-cards">
   <div className="card">
     <div className="card-icon icon-red"><Receipt size={18} /></div>
@@ -1018,112 +1081,165 @@ function handleExportPDF() {
 </div>
 <div className="dashboard-bottom-row">
 <div className="budget-section">
-  <h2>Monthly Budget Overview</h2>
+  <div className="budget-card-header">
+    <h2>Monthly Budget Overview</h2>
+    {!editingBudget && (
+      <button
+        className="budget-edit-link-btn"
+        onClick={() => setEditingBudget(true)}
+      >
+        <Pencil size={14} /> Edit Budget
+      </button>
+    )}
+  </div>
+
+  {editingBudget && (
+    <div className="budget-edit">
+      <input
+        type="number"
+        value={budgetInput}
+        onChange={(e) => setBudgetInput(e.target.value)}
+        placeholder="Enter monthly budget"
+        className="budget-input"
+      />
+
+      <button
+        className="change-budget-btn"
+        onClick={() => {
+          const budget = Number(budgetInput);
+
+          if (isNaN(budget) || budget <= 0) {
+            toast.warning("Please enter a valid budget greater than 0.");
+            return;
+          }
+
+          setMonthlyBudget(budget);
+          setBudgetInput(budget);
+          localStorage.setItem("monthlyBudget", budget);
+          setEditingBudget(false);
+
+          toast.success("Monthly budget updated successfully!");
+        }}
+      >
+        Save Budget
+      </button>
+
+      <button
+        className="change-budget-btn"
+        onClick={() => {
+          setBudgetInput(monthlyBudget);
+          setEditingBudget(false);
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  )}
 
   <div className="budget-details">
-    <p>
-      <strong>Budget:</strong> ₹ {monthlyBudget}
+    <div className="budget-details-rows">
+    <p className="budget-row">
+      <span className="budget-row-icon icon-purple">
+        <PiggyBank size={16} />
+      </span>
+      <span className="budget-row-text">
+        <span className="budget-row-label">Budget</span>
+        <span className="budget-row-value">₹ {monthlyBudget}</span>
+      </span>
     </p>
 
-    <p>
-      <strong>Spent:</strong> ₹ {totalExpense}
+    <p className="budget-row">
+      <span className="budget-row-icon icon-red">
+        <Receipt size={16} />
+      </span>
+      <span className="budget-row-text">
+        <span className="budget-row-label">Spent</span>
+        <span className="budget-row-value">₹ {totalExpense}</span>
+      </span>
     </p>
 
-    <p>
-      <strong>Remaining:</strong> ₹ {remainingBudget}
+    <p className="budget-row">
+      <span className="budget-row-icon icon-green">
+        <TrendingUp size={16} />
+      </span>
+      <span className="budget-row-text">
+        <span className="budget-row-label">Remaining</span>
+        <span className="budget-row-value">₹ {remainingBudget}</span>
+      </span>
     </p>
 
-    <p>
-  <strong>Used:</strong>{" "}
-  <span
-    style={{
-      fontWeight: "700",
-      color: budgetStatusColor,
-    }}
-  >
-    {budgetUsedPercentage.toFixed(1)}%
-  </span>
-</p>
-    <div className="budget-progress">
-  <div
-  className="budget-progress-fill"
-  style={{
-    width: `${budgetUsedPercentage}%`,
-   backgroundColor: budgetStatusColor,
-  }}
-></div>
-</div>
-{editingBudget ? (
-  <div className="budget-edit">
-    <input
-      type="number"
-      value={budgetInput}
-      onChange={(e) => setBudgetInput(e.target.value)}
-      placeholder="Enter monthly budget"
-      className="budget-input"
+    <p className="budget-row">
+      <span className="budget-row-icon icon-amber">
+        <BarChart3 size={16} />
+      </span>
+      <span className="budget-row-text">
+        <span className="budget-row-label">Used</span>
+        <span
+          className="budget-row-value"
+          style={{ fontWeight: "700", color: budgetStatusColor }}
+        >
+          {budgetUsedPercentage.toFixed(1)}%
+        </span>
+      </span>
+    </p>
+    </div>
+
+<div className="budget-gauge-col">
+<div className="budget-gauge">
+  <svg width="170" height="170" viewBox="0 0 170 170">
+    <circle
+      cx="85"
+      cy="85"
+      r="72"
+      fill="none"
+      stroke="#e5e7eb"
+      strokeWidth="14"
     />
-
-    <button
-      className="change-budget-btn"
-      onClick={() => {
-        const budget = Number(budgetInput);
-
-        if (isNaN(budget) || budget <= 0) {
-          toast.warning("Please enter a valid budget greater than 0.");
-          return;
-        }
-
-        setMonthlyBudget(budget);
-        setBudgetInput(budget);
-        localStorage.setItem("monthlyBudget", budget);
-        setEditingBudget(false);
-
-        toast.success("Monthly budget updated successfully!");
-      }}
-    >
-      Save Budget
-    </button>
-
-    <button
-      className="change-budget-btn"
-      onClick={() => {
-        setBudgetInput(monthlyBudget);
-        setEditingBudget(false);
-      }}
-    >
-      Cancel
-    </button>
+    <circle
+      cx="85"
+      cy="85"
+      r="72"
+      fill="none"
+      stroke={budgetStatusColor}
+      strokeWidth="14"
+      strokeDasharray={2 * Math.PI * 72}
+      strokeDashoffset={
+        2 * Math.PI * 72 * (1 - budgetUsedPercentage / 100)
+      }
+      strokeLinecap="round"
+      transform="rotate(-90 85 85)"
+    />
+  </svg>
+  <div className="budget-gauge-label">
+    <span className="budget-gauge-percent">
+      {budgetUsedPercentage.toFixed(1)}%
+    </span>
+    <span className="budget-gauge-sub">Used</span>
   </div>
-) : (
-  <button
-    className="change-budget-btn"
-    onClick={() => setEditingBudget(true)}
-  >
-    Edit Budget
-  </button>
-)}
+</div>
+
 {remainingBudget >= 0 ? (
-  <p
-    style={{
-      color: "#16a34a",
-      fontWeight: "bold",
-      marginTop: "12px",
-    }}
-  >
+  <p className="budget-remaining-msg" style={{ color: "#16a34a" }}>
     ✅ You have ₹ {remainingBudget} remaining this month.
   </p>
 ) : (
-  <p
-    style={{
-      color: "#dc2626",
-      fontWeight: "bold",
-      marginTop: "12px",
-    }}
-  >
+  <p className="budget-remaining-msg" style={{ color: "#dc2626" }}>
     ⚠️ Budget exceeded by ₹ {Math.abs(remainingBudget)}.
   </p>
 )}
+</div>
   </div>
+
+  <div className="budget-progress">
+  <div
+    className="budget-progress-fill"
+    style={{
+      width: `${budgetUsedPercentage}%`,
+      backgroundColor: budgetStatusColor,
+    }}
+  ></div>
+</div>
+
 </div>
 
 <div className="expense-chart-wrapper">
@@ -1173,12 +1289,79 @@ function handleExportPDF() {
   </div>
 )}
       <hr />
-     <IncomeTable
-  incomeList={incomeList}
-  handleEditIncome={handleEditIncome}
-  handleDeleteIncome={handleDeleteIncome}
-/>
-      <h2>Recent Expenses</h2>
+
+      <div className="recent-row">
+        <div className="recent-col">
+          <IncomeTable
+            incomeList={incomeList.slice(0, 5)}
+            handleEditIncome={handleEditIncome}
+            handleDeleteIncome={handleDeleteIncome}
+          />
+        </div>
+
+        <div className="recent-col">
+          <h2>Recent Expenses</h2>
+          <table className="dashboard-table recent-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Name</th>
+                <th>Amount</th>
+                <th>Category</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="5">Loading...</td>
+                </tr>
+              ) : expenses.length === 0 ? (
+                <tr>
+                  <td colSpan="5">No expenses found.</td>
+                </tr>
+              ) : (
+                expenses.slice(0, 5).map((expense) => (
+                  <tr key={expense._id}>
+                    <td>
+                      {new Date(
+                        expense.updatedAt || expense.createdAt
+                      ).toLocaleDateString()}
+                    </td>
+                    <td>{expense.title}</td>
+                    <td>₹ {expense.amount}</td>
+                    <td>
+                      <span
+                        className={`category-pill cat-${expense.category?.toLowerCase()}`}
+                      >
+                        {expense.category}
+                      </span>
+                    </td>
+                    <td>
+                      <button
+                        className="edit-btn"
+                        onClick={() => handleEditExpense(expense)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDeleteExpense(expense._id)}
+                        disabled={deletingId === expense._id}
+                      >
+                        {deletingId === expense._id ? "..." : "Delete"}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <h2>Full Expense List</h2>
      <div className="export-buttons">
   <button onClick={handleExportExcel}>
     📊 Export Excel
@@ -1374,6 +1557,8 @@ function handleExportPDF() {
 <h2 className="total-expense">
   Total Expense: ₹ {totalExpense}
 </h2>
+    </>
+    )}
            </main>
       </div>
 
