@@ -1002,7 +1002,7 @@ overflow: visible;
 }
 
 .dark-mode .chart-average {
-  color: #9ca3af;
+  color: #ffffff;
 }
 .dark-mode .expense-chart h2,
 .dark-mode .chart-col-header h3,
@@ -1068,7 +1068,7 @@ overflow: visible;
 .budget-gauge-sub {
   display: block;
   font-size: 14px;
-  color: #6b7280;
+  color: #111827;
 }
 
 .dark-mode .budget-gauge-percent {
@@ -1096,6 +1096,10 @@ overflow: visible;
 
 .budget-card-header h2 {
   margin: 0;
+}
+
+.dark-mode .budget-card-header h2 {
+  color: white;
 }
 
 .budget-edit-link-btn {
@@ -1289,4 +1293,38 @@ overflow: visible;
   text-align: center;
   padding: 20px 0;
   margin: 0;
+}
+.dark-mode .card p {
+  color: white;
+}
+.dark-mode .budget-row-label {
+  color: white;
+}
+.dark-mode .budget-section {
+  background: #2d2d2d;
+  color: white;
+}
+.dark-mode .expense-chart .recharts-cartesian-axis-tick-value {
+  fill: #ffffff !important;
+}
+
+.dark-mode .expense-chart .recharts-legend-item-text {
+  color: #d1d5db !important;
+}
+
+.dark-mode .expense-chart .recharts-cartesian-grid-horizontal line,
+.dark-mode .expense-chart .recharts-cartesian-grid-vertical line {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+.dark-mode .legend-text {
+  color: white;
+}
+.dark-mode .welcome-text {
+  color: #ffffff;
+}
+.dark-mode h2 {
+  color: white;
+}
+.dark-mode .budget-gauge-sub {
+  color: #ffffff;
 }

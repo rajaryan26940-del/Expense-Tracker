@@ -1147,7 +1147,7 @@ function handleExportPDF() {
     marginTop: "6px",
     fontSize: "16px",
     fontWeight: "500",
-    color: "#555",
+    color: darkMode ? "#ffffff" : "#555",
   }}
 >
   Per Day
@@ -1165,7 +1165,7 @@ function handleExportPDF() {
     marginTop: "6px",
     fontSize: "16px",
     fontWeight: "500",
-    color: "#666",
+    color: darkMode ? "#ffffff" : "#666",
   }}
 >
   Current Budget
