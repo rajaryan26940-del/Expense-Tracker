@@ -5,10 +5,6 @@ function IncomeTable({
 }) {
   return (
     <>
-      <h2 className="dashboard-title">
-        Recent Income
-      </h2>
-
       <table className="dashboard-table recent-table">
         <thead>
          <tr>

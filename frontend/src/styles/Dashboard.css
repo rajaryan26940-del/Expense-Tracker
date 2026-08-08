@@ -1231,3 +1231,62 @@ overflow: visible;
 .dark-mode .recent-col h2 {
   color: #ffffff;
 }
+.recent-col-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.recent-col-header h2 {
+  margin: 0;
+}
+
+.view-all-link,
+.view-all-link:hover,
+.view-all-link:focus,
+.view-all-link:active {
+  background: transparent !important;
+  border: none;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  width: auto;
+  padding: 2px 4px;
+  margin: 0;
+  outline: none;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
+}
+
+.view-all-link:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.view-all-disabled {
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: default;
+}
+
+.dark-mode .view-all-disabled {
+  color: #6b7280;
+}
+.notif-time {
+  font-size: 11px;
+  color: #9ca3af;
+  margin: 2px 0 0;
+}
+
+.notif-empty {
+  font-size: 13px;
+  color: #6b7280;
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+}

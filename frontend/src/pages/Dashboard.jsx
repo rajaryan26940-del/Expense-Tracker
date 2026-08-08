@@ -86,6 +86,54 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
     return saved !== null ? Number(saved) : 1;
   });
   const notifRef = useRef(null);
+  const [notifications, setNotifications] = useState(() => {
+    const saved = localStorage.getItem("notifications");
+    return saved !== null ? JSON.parse(saved) : [];
+  });
+
+  function formatRelativeTime(timestamp) {
+    const secondsAgo = Math.floor((Date.now() - timestamp) / 1000);
+
+    if (secondsAgo < 60) {
+      return "Just now";
+    }
+
+    const minutesAgo = Math.floor(secondsAgo / 60);
+    if (minutesAgo < 60) {
+      return `${minutesAgo}m ago`;
+    }
+
+    const hoursAgo = Math.floor(minutesAgo / 60);
+    if (hoursAgo < 24) {
+      return `${hoursAgo}h ago`;
+    }
+
+    const daysAgo = Math.floor(hoursAgo / 24);
+    return `${daysAgo}d ago`;
+  }
+
+  function addNotification(title, message) {
+    const newNotification = {
+      id: Date.now(),
+      title,
+      message,
+      timestamp: Date.now(),
+    };
+
+    setNotifications((prev) => {
+      const updated = [newNotification, ...prev].slice(0, 20);
+      localStorage.setItem("notifications", JSON.stringify(updated));
+      return updated;
+    });
+
+    setUnreadCount((prev) => {
+      const updated = prev + 1;
+      localStorage.setItem("unreadCount", String(updated));
+      return updated;
+    });
+  }
+  const fullExpenseListRef = useRef(null);
+  const previousBudgetPercentRef = useRef(null);
   const [activePage, setActivePage] = useState("Dashboard");
 
   const [confirmState, setConfirmState] = useState({
@@ -258,6 +306,30 @@ const budgetStatusColor =
     : budgetUsedPercentage < 100
     ? "#f59e0b"
     : "#ef4444";
+
+useEffect(() => {
+  if (previousBudgetPercentRef.current === null) {
+    previousBudgetPercentRef.current = budgetUsedPercentage;
+    return;
+  }
+
+  const previous = previousBudgetPercentRef.current;
+  const current = budgetUsedPercentage;
+
+  if (previous < 100 && current >= 100) {
+    addNotification(
+      "Budget Exceeded",
+      `You've exceeded your monthly budget (${current.toFixed(1)}% used).`
+    );
+  } else if (previous < 70 && current >= 70) {
+    addNotification(
+      "Budget Alert",
+      `You've used ${current.toFixed(1)}% of your monthly budget.`
+    );
+  }
+
+  previousBudgetPercentRef.current = current;
+}, [budgetUsedPercentage]);
 
 
 const categoryTotals = {};
@@ -469,6 +541,8 @@ setShowForm(false);
   }
 
   async function handleDeleteExpense(id) {
+  const expenseToDelete = expenses.find((expense) => expense._id === id);
+
   openConfirm({
     title: "Delete Expense",
     message: "Are you sure you want to delete this expense?",
@@ -483,6 +557,11 @@ setShowForm(false);
           expenses.filter((expense) => expense._id !== id)
         );
         toast.success("Expense deleted successfully!");
+
+        addNotification(
+          "Expense Deleted",
+          `Expense "${expenseToDelete?.title || "Untitled"}" of ₹${expenseToDelete?.amount ?? 0} deleted.`
+        );
       } catch (error) {
         console.log(error);
         toast.error(
@@ -545,6 +624,11 @@ async function handleSaveIncome() {
         source: incomeSource,
       });
 toast.success("Income added successfully");
+
+addNotification(
+  "Income Added",
+  `${incomeTitle || "Income"} of ₹${incomeAmount || 0} added.`
+);
     }
 
    await loadIncome();
@@ -882,10 +966,19 @@ function handleExportPDF() {
                     Mark all as read
                   </button>
                 </div>
-                <div className="notif-item">
-                  <p className="notif-title">Budget Alert</p>
-                  <p className="notif-text">You've used {budgetUsedPercentage.toFixed(0)}% of your monthly budget.</p>
-                </div>
+                {notifications.length === 0 ? (
+                  <p className="notif-empty">No notifications yet.</p>
+                ) : (
+                  notifications.slice(0, 5).map((notification) => (
+                    <div className="notif-item" key={notification.id}>
+                      <p className="notif-title">{notification.title}</p>
+                      <p className="notif-text">{notification.message}</p>
+                      <p className="notif-time">
+                        {formatRelativeTime(notification.timestamp)}
+                      </p>
+                    </div>
+                  ))
+                )}
                 <a className="notif-view-all" href="#">View all notifications</a>
               </div>
             )}
@@ -1292,6 +1385,10 @@ function handleExportPDF() {
 
       <div className="recent-row">
         <div className="recent-col">
+          <div className="recent-col-header">
+            <h2>Recent Income</h2>
+            <span className="view-all-disabled">View All</span>
+          </div>
           <IncomeTable
             incomeList={incomeList.slice(0, 5)}
             handleEditIncome={handleEditIncome}
@@ -1300,7 +1397,15 @@ function handleExportPDF() {
         </div>
 
         <div className="recent-col">
-          <h2>Recent Expenses</h2>
+          <div className="recent-col-header">
+            <h2>Recent Expenses</h2>
+            <button
+              className="view-all-link"
+              onClick={() => fullExpenseListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+            >
+              View All
+            </button>
+          </div>
           <table className="dashboard-table recent-table">
             <thead>
               <tr>
@@ -1361,7 +1466,7 @@ function handleExportPDF() {
         </div>
       </div>
 
-      <h2>Full Expense List</h2>
+      <h2 ref={fullExpenseListRef}>Full Expense List</h2>
      <div className="export-buttons">
   <button onClick={handleExportExcel}>
     📊 Export Excel
