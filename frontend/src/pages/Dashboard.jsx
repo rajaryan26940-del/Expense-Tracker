@@ -1046,7 +1046,128 @@ function handleExportPDF() {
         </div>
       </div>
 
-    {activePage === "Categories" ? (
+    {activePage === "Reports" ? (
+      <div className="reports-page">
+        <h2>Reports</h2>
+        <p className="reports-subtitle">
+          Monthly summary for{" "}
+          {currentDate.toLocaleString("default", { month: "long" })}{" "}
+          {currentDate.getFullYear()}
+        </p>
+
+        <div className="reports-summary-grid">
+          <div className="reports-summary-card">
+            <span className="reports-summary-label">Total Income</span>
+            <p
+              className="reports-summary-value"
+              style={{ color: "#16a34a" }}
+            >
+              ₹ {totalIncome.toLocaleString("en-IN")}
+            </p>
+          </div>
+
+          <div className="reports-summary-card">
+            <span className="reports-summary-label">Total Expense</span>
+            <p
+              className="reports-summary-value"
+              style={{ color: "#dc2626" }}
+            >
+              ₹ {totalExpense.toLocaleString("en-IN")}
+            </p>
+          </div>
+
+          <div className="reports-summary-card">
+            <span className="reports-summary-label">Net Savings</span>
+            <p
+              className="reports-summary-value"
+              style={{
+                color: remainingBalance >= 0 ? "#16a34a" : "#dc2626",
+              }}
+            >
+              ₹ {remainingBalance.toLocaleString("en-IN")}
+            </p>
+          </div>
+        </div>
+
+        <div className="reports-row">
+          <div className="reports-card">
+            <h3>This Month vs Last Month</h3>
+            <p className="reports-big-number">
+              ₹ {thisMonthExpense.toLocaleString("en-IN")}
+            </p>
+            <p className="reports-sub-text">
+              Last month: ₹ {lastMonthExpense.toLocaleString("en-IN")}
+            </p>
+            <p
+              className="reports-trend"
+              style={{
+                color: expenseTrend === "Increase" ? "#dc2626" : "#16a34a",
+              }}
+            >
+              {expenseTrend === "Increase" ? "📈 Increased" : "📉 Decreased"}{" "}
+              ₹ {Math.abs(expenseDifference).toLocaleString("en-IN")}
+            </p>
+          </div>
+
+          <div className="reports-card">
+            <h3>Spending Habits</h3>
+            <div className="reports-stat-row">
+              <span>Average Daily Spending</span>
+              <strong>₹ {averageDailySpending.toLocaleString("en-IN")}</strong>
+            </div>
+            <div className="reports-stat-row">
+              <span>Highest Expense</span>
+              <strong>₹ {highestExpense.toLocaleString("en-IN")}</strong>
+            </div>
+            <div className="reports-stat-row">
+              <span>Lowest Expense</span>
+              <strong>₹ {lowestExpense.toLocaleString("en-IN")}</strong>
+            </div>
+            <div className="reports-stat-row">
+              <span>Highest Spending Day</span>
+              <strong>{highestSpendingDay}</strong>
+            </div>
+          </div>
+        </div>
+
+        <h3 className="reports-section-title">Category Breakdown</h3>
+
+        <div className="categories-grid">
+          {categoryStats.map((cat) => (
+            <div className="category-card" key={cat.name}>
+              <div className="category-card-header">
+                <span
+                  className={`category-pill cat-${cat.name.toLowerCase()}`}
+                >
+                  {cat.name}
+                </span>
+                <span className="category-card-percent">
+                  {cat.percentage.toFixed(1)}%
+                </span>
+              </div>
+
+              <p className="category-card-total">
+                ₹ {cat.total.toLocaleString("en-IN")}
+              </p>
+
+              <p className="category-card-count">
+                {cat.count} {cat.count === 1 ? "expense" : "expenses"}
+              </p>
+
+              <div className="category-card-bar">
+                <div
+                  className="category-card-bar-fill"
+                  style={{
+                    width: `${cat.percentage}%`,
+                    backgroundColor: categoryColors[cat.name],
+                  }}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : activePage === "Categories" ? (
       <div className="categories-page">
         <h2>Categories</h2>
         <p className="categories-subtitle">
