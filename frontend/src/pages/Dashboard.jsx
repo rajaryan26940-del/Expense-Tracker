@@ -135,6 +135,7 @@ const [budgetInput, setBudgetInput] = useState(monthlyBudget);
   const fullExpenseListRef = useRef(null);
   const previousBudgetPercentRef = useRef(null);
   const [activePage, setActivePage] = useState("Dashboard");
+  const [showAllNotifications, setShowAllNotifications] = useState(false);
 
   const [confirmState, setConfirmState] = useState({
     isOpen: false,
@@ -1018,7 +1019,15 @@ function handleExportPDF() {
                     </div>
                   ))
                 )}
-                <a className="notif-view-all" href="#">View all notifications</a>
+                <button
+                  className="notif-view-all"
+                  onClick={() => {
+                    setShowNotifications(false);
+                    setShowAllNotifications(true);
+                  }}
+                >
+                  View all notifications
+                </button>
               </div>
             )}
           </div>
@@ -1868,6 +1877,44 @@ function handleExportPDF() {
     )}
            </main>
       </div>
+
+      {showAllNotifications && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowAllNotifications(false)}
+        >
+          <div
+            className="all-notifications-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="all-notifications-header">
+              <h2>All Notifications</h2>
+              <button
+                className="all-notifications-close"
+                onClick={() => setShowAllNotifications(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="all-notifications-list">
+              {notifications.length === 0 ? (
+                <p className="notif-empty">No notifications yet.</p>
+              ) : (
+                notifications.map((notification) => (
+                  <div className="notif-item" key={notification.id}>
+                    <p className="notif-title">{notification.title}</p>
+                    <p className="notif-text">{notification.message}</p>
+                    <p className="notif-time">
+                      {formatRelativeTime(notification.timestamp)}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <ConfirmModal
         isOpen={confirmState.isOpen}

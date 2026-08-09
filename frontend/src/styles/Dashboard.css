@@ -667,13 +667,31 @@ overflow: visible;
   margin: 0;
 }
 
-.notif-view-all {
+.notif-view-all,
+.notif-view-all:hover,
+.notif-view-all:focus,
+.notif-view-all:active {
   display: block;
+  width: 100%;
   text-align: center;
   font-size: 12px;
   color: #2563eb;
   margin-top: 8px;
   text-decoration: none;
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  outline: none;
+}
+
+.notif-view-all:hover {
+  text-decoration: underline;
+}
+
+.notif-view-all:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 /* ---------- Welcome row (greeting + Add buttons) ---------- */
@@ -1520,4 +1538,69 @@ overflow: visible;
 .dark-mode .reports-stat-row {
   border-bottom-color: rgba(255, 255, 255, 0.1);
   color: white;
+}
+.all-notifications-modal {
+  width: 90%;
+  max-width: 480px;
+  max-height: 80vh;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.all-notifications-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.all-notifications-header h2 {
+  margin: 0;
+}
+
+.all-notifications-close {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  width: auto;
+  padding: 4px 8px;
+  margin: 0;
+  color: #6b7280;
+}
+
+.all-notifications-close:hover {
+  color: #111827;
+}
+
+.all-notifications-list {
+  overflow-y: auto;
+}
+
+.dark-mode .all-notifications-modal {
+  background: #2d2d2d;
+}
+
+.dark-mode .all-notifications-close {
+  color: #d1d5db;
+}
+
+.dark-mode .all-notifications-close:hover {
+  color: white;
+}
+.dark-mode .notif-dropdown {
+  background: #2d2d2d;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .notif-item {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .notif-text {
+  color: #d1d5db;
 }
