@@ -352,6 +352,45 @@ Object.entries(categoryTotals).forEach(
     }
   }
 );
+
+const categoryColors = {
+  Food: "#3F5FE0",
+  Travel: "#28A745",
+  Shopping: "#FFC107",
+  Bills: "#DC3545",
+  Others: "#6F42C1",
+};
+
+const allExpensesTotal = expenses.reduce(
+  (sum, expense) => sum + Number(expense.amount),
+  0
+);
+
+const categoryStats = [
+  "Food",
+  "Travel",
+  "Shopping",
+  "Bills",
+  "Others",
+].map((name) => {
+  const catExpenses = expenses.filter(
+    (expense) => expense.category === name
+  );
+
+  const total = catExpenses.reduce(
+    (sum, expense) => sum + Number(expense.amount),
+    0
+  );
+
+  return {
+    name,
+    total,
+    count: catExpenses.length,
+    percentage:
+      allExpensesTotal > 0 ? (total / allExpensesTotal) * 100 : 0,
+  };
+});
+
 const currentDate = new Date();
 
 const thisMonthExpense = filteredExpenses.reduce(
@@ -1007,7 +1046,49 @@ function handleExportPDF() {
         </div>
       </div>
 
-    {activePage !== "Dashboard" ? (
+    {activePage === "Categories" ? (
+      <div className="categories-page">
+        <h2>Categories</h2>
+        <p className="categories-subtitle">
+          Overview of spending across all categories.
+        </p>
+
+        <div className="categories-grid">
+          {categoryStats.map((cat) => (
+            <div className="category-card" key={cat.name}>
+              <div className="category-card-header">
+                <span
+                  className={`category-pill cat-${cat.name.toLowerCase()}`}
+                >
+                  {cat.name}
+                </span>
+                <span className="category-card-percent">
+                  {cat.percentage.toFixed(1)}%
+                </span>
+              </div>
+
+              <p className="category-card-total">
+                ₹ {cat.total.toLocaleString("en-IN")}
+              </p>
+
+              <p className="category-card-count">
+                {cat.count} {cat.count === 1 ? "expense" : "expenses"}
+              </p>
+
+              <div className="category-card-bar">
+                <div
+                  className="category-card-bar-fill"
+                  style={{
+                    width: `${cat.percentage}%`,
+                    backgroundColor: categoryColors[cat.name],
+                  }}
+                ></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ) : activePage !== "Dashboard" ? (
       <div className="coming-soon">
         <h2>{activePage}</h2>
         <p>This section is coming soon.</p>
