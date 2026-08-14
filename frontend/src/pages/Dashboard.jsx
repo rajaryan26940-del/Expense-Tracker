@@ -59,6 +59,9 @@ const [incomeList, setIncomeList] = useState([]);
 
 const [incomeEditId, setIncomeEditId] = useState(null);
 
+const [incomeSearch, setIncomeSearch] = useState("");
+const [incomeSortOption, setIncomeSortOption] = useState("latest");
+
 const [settingsName, setSettingsName] = useState(
   localStorage.getItem("name") || ""
 );
@@ -290,6 +293,23 @@ useEffect(() => {
 );
 const remainingBalance =
   totalIncome - totalExpense;
+
+const filteredIncomeList = incomeList
+  .filter((income) =>
+    income.title.toLowerCase().includes(incomeSearch.toLowerCase())
+  )
+  .sort((a, b) => {
+    if (incomeSortOption === "highest") {
+      return Number(b.amount) - Number(a.amount);
+    }
+
+    if (incomeSortOption === "lowest") {
+      return Number(a.amount) - Number(b.amount);
+    }
+
+    return new Date(b.createdAt) - new Date(a.createdAt);
+  });
+
   const totalEntries = filteredExpenses.length;
 
   const highestExpense =
@@ -1118,15 +1138,19 @@ function handleExportPDF() {
           Welcome back, <span className="welcome-name">{localStorage.getItem("name")}</span> 👋
         </p>
         <div className="action-buttons">
-          <button className="btn-primary" onClick={() => { setActiveForm("expense"); handleToggleForm(); }}>
-            + {showForm && activeForm === "expense" ? "Close Form" : "Add Expense"}
-          </button>
-          <button className="btn-success" onClick={() => {
-            setIncomeTitle(""); setIncomeAmount(""); setIncomeSource("");
-            setIncomeEditId(null); setActiveForm("income"); setShowForm(true);
-          }}>
-            + Add Income
-          </button>
+          {(activePage === "Dashboard" || activePage === "Expenses") && (
+            <button className="btn-primary" onClick={() => { setActiveForm("expense"); handleToggleForm(); }}>
+              + {showForm && activeForm === "expense" ? "Close Form" : "Add Expense"}
+            </button>
+          )}
+          {(activePage === "Dashboard" || activePage === "Income") && (
+            <button className="btn-success" onClick={() => {
+              setIncomeTitle(""); setIncomeAmount(""); setIncomeSource("");
+              setIncomeEditId(null); setActiveForm("income"); setShowForm(true);
+            }}>
+              + Add Income
+            </button>
+          )}
         </div>
       </div>
 
@@ -1250,6 +1274,66 @@ function handleExportPDF() {
             </div>
           ))}
         </div>
+      </div>
+    ) : activePage === "Income" ? (
+      <div className="income-page">
+        <div className="income-page-header">
+          <div>
+            <h2>Income</h2>
+            <p className="income-subtitle">
+              All your income entries in one place.
+            </p>
+          </div>
+
+          <div className="income-page-total">
+            <span>Total Income</span>
+            <p>₹ {totalIncome.toLocaleString("en-IN")}</p>
+          </div>
+        </div>
+
+        {showForm && activeForm === "income" && (
+          <div ref={formRef}>
+            <IncomeForm
+              incomeTitle={incomeTitle}
+              setIncomeTitle={setIncomeTitle}
+              incomeAmount={incomeAmount}
+              setIncomeAmount={setIncomeAmount}
+              incomeSource={incomeSource}
+              setIncomeSource={setIncomeSource}
+              handleSaveIncome={handleSaveIncome}
+              incomeEditId={incomeEditId}
+            />
+          </div>
+        )}
+
+        <div className="filter-controls">
+          <input
+            type="text"
+            placeholder="Search income..."
+            value={incomeSearch}
+            onChange={(e) => setIncomeSearch(e.target.value)}
+          />
+          {incomeSearch && (
+            <button onClick={() => setIncomeSearch("")}>
+              Clear Search
+            </button>
+          )}
+
+          <select
+            value={incomeSortOption}
+            onChange={(e) => setIncomeSortOption(e.target.value)}
+          >
+            <option value="latest">Latest</option>
+            <option value="highest">Highest Amount</option>
+            <option value="lowest">Lowest Amount</option>
+          </select>
+        </div>
+
+        <IncomeTable
+          incomeList={filteredIncomeList}
+          handleEditIncome={handleEditIncome}
+          handleDeleteIncome={handleDeleteIncome}
+        />
       </div>
     ) : activePage === "Categories" ? (
       <div className="categories-page">
@@ -1780,7 +1864,12 @@ function handleExportPDF() {
         <div className="recent-col">
           <div className="recent-col-header">
             <h2>Recent Income</h2>
-            <span className="view-all-disabled">View All</span>
+            <button
+              className="view-all-link"
+              onClick={() => setActivePage("Income")}
+            >
+              View All
+            </button>
           </div>
           <IncomeTable
             incomeList={incomeList.slice(0, 5)}

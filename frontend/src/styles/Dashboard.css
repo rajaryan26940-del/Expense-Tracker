@@ -239,6 +239,14 @@ button:active {
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 14px;
+  background-color: white;
+  color: #111827;
+}
+.dark-mode .filter-controls input,
+.dark-mode .filter-controls select {
+  background-color: #333;
+  color: white;
+  border: 1px solid #666;
 }
 
 .filter-controls input {
@@ -1758,4 +1766,55 @@ input[type="password"]::-ms-clear {
   background-color: #333;
   color: white;
   border: 1px solid #666;
+}
+.income-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.income-page-header h2 {
+  margin: 0 0 4px;
+}
+
+.income-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0;
+}
+
+.dark-mode .income-subtitle {
+  color: #ffffff;
+}
+
+.income-page-total {
+  background: white;
+  border-radius: 12px;
+  padding: 14px 20px;
+  text-align: right;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.income-page-total span {
+  font-size: 13px;
+  color: #6b7280;
+  font-weight: 600;
+}
+
+.income-page-total p {
+  margin: 4px 0 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.dark-mode .income-page-total {
+  background: #2d2d2d;
+}
+
+.dark-mode .income-page-total span {
+  color: #d1d5db;
 }
