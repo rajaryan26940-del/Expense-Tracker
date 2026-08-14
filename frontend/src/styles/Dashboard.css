@@ -1604,3 +1604,158 @@ overflow: visible;
 .dark-mode .notif-text {
   color: #d1d5db;
 }
+.settings-page h2 {
+  margin: 0 0 4px;
+}
+
+.settings-subtitle {
+  color: #6b7280;
+  font-size: 14px;
+  margin: 0 0 20px;
+}
+
+.dark-mode .settings-subtitle {
+  color: #ffffff;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.settings-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.settings-card h3 {
+  margin: 0 0 6px;
+  font-size: 17px;
+}
+
+.settings-card-desc {
+  font-size: 13px;
+  color: #6b7280;
+  margin: 0 0 18px;
+}
+
+.settings-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin: 12px 0 6px;
+}
+
+.settings-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  box-sizing: border-box;
+  background-color: white;
+  color: #111827;
+}
+.settings-password-wrapper {
+  position: relative;
+}
+
+.settings-password-wrapper .settings-input {
+  padding-right: 42px;
+}
+
+.settings-eye-btn {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 4px;
+  width: auto;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  box-shadow: none;
+  forced-color-adjust: none;
+}
+
+.settings-eye-btn:focus,
+.settings-eye-btn:active,
+.settings-eye-btn:focus-visible {
+  background: transparent;
+  box-shadow: none;
+}
+
+.settings-eye-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+.settings-eye-btn:active {
+  transform: translateY(-50%) scale(0.96);
+}
+.settings-eye-btn:hover {
+  color: #374151;
+}
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+.dark-mode .settings-eye-btn {
+  color: #9ca3af;
+}
+
+.dark-mode .settings-eye-btn:hover {
+  color: white;
+}
+.settings-save-btn {
+  margin-top: 18px;
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: auto;
+}
+
+.settings-save-btn:hover {
+  background: #1d4ed8;
+}
+
+.settings-save-btn:disabled {
+  background: #93c5fd;
+  cursor: not-allowed;
+}
+
+.dark-mode .settings-card {
+  background: #2d2d2d;
+}
+
+.dark-mode .settings-card h3 {
+  color: white;
+}
+
+.dark-mode .settings-card-desc {
+  color: #d1d5db;
+}
+
+.dark-mode .settings-label {
+  color: white;
+}
+
+.dark-mode .settings-input {
+  background-color: #333;
+  color: white;
+  border: 1px solid #666;
+}

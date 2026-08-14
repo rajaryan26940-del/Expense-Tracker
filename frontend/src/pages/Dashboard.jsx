@@ -22,6 +22,7 @@ import {
   updateIncome,
   deleteIncome,
 } from "../services/incomeService";
+import { updateName, changePassword } from "../services/userService";
 import {
   LayoutDashboard,
   Receipt,
@@ -40,6 +41,8 @@ import {
   ListChecks,
   FileText,
   Pencil,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 function Dashboard() {
   const navigate = useNavigate();
@@ -55,6 +58,20 @@ const [incomeSource, setIncomeSource] = useState("");
 const [incomeList, setIncomeList] = useState([]);
 
 const [incomeEditId, setIncomeEditId] = useState(null);
+
+const [settingsName, setSettingsName] = useState(
+  localStorage.getItem("name") || ""
+);
+const [savingName, setSavingName] = useState(false);
+
+const [currentPassword, setCurrentPassword] = useState("");
+const [newPassword, setNewPassword] = useState("");
+const [confirmNewPassword, setConfirmNewPassword] = useState("");
+const [savingPassword, setSavingPassword] = useState(false);
+
+const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+const [showNewPassword, setShowNewPassword] = useState(false);
+const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [receipt, setReceipt] = useState(null);
   const [isRecurring, setIsRecurring] = useState(false);
 
@@ -770,6 +787,64 @@ function handleEditIncome(income) {
     },
   });
 }
+async function handleUpdateName() {
+  if (settingsName.trim() === "") {
+    toast.warning("Please enter a name");
+    return;
+  }
+
+  try {
+    setSavingName(true);
+    const data = await updateName(settingsName.trim());
+
+    localStorage.setItem("name", data.name);
+    setSettingsName(data.name);
+
+    toast.success("Name updated successfully!");
+  } catch (error) {
+    console.log(error);
+    toast.error(
+      error.response?.data?.message || "Failed to update name"
+    );
+  } finally {
+    setSavingName(false);
+  }
+}
+
+async function handleChangePassword() {
+  if (currentPassword.trim() === "") {
+    toast.warning("Please enter your current password");
+    return;
+  }
+
+  if (newPassword.trim() === "") {
+    toast.warning("Please enter a new password");
+    return;
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    toast.warning("New passwords do not match");
+    return;
+  }
+
+  try {
+    setSavingPassword(true);
+    await changePassword(currentPassword, newPassword);
+
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmNewPassword("");
+
+    toast.success("Password changed successfully!");
+  } catch (error) {
+    console.log(error);
+    toast.error(
+      error.response?.data?.message || "Failed to change password"
+    );
+  } finally {
+    setSavingPassword(false);
+  }
+}
 function handleExportExcel() {
   if (filteredExpenses.length === 0) {
     toast.warning("No expenses available to export.");
@@ -1216,6 +1291,113 @@ function handleExportPDF() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+    ) : activePage === "Settings" ? (
+      <div className="settings-page">
+        <h2>Settings</h2>
+        <p className="settings-subtitle">
+          Manage your account details and security.
+        </p>
+
+        <div className="settings-grid">
+          <div className="settings-card">
+            <h3>Edit Name</h3>
+            <p className="settings-card-desc">
+              Update the name shown across your dashboard.
+            </p>
+
+            <label className="settings-label">Name</label>
+            <input
+              type="text"
+              className="settings-input"
+              value={settingsName}
+              onChange={(e) => setSettingsName(e.target.value)}
+              placeholder="Enter your name"
+            />
+
+            <button
+              className="settings-save-btn"
+              onClick={handleUpdateName}
+              disabled={savingName}
+            >
+              {savingName ? "Saving..." : "Save Name"}
+            </button>
+          </div>
+
+          <div className="settings-card">
+            <h3>Change Password</h3>
+            <p className="settings-card-desc">
+              Choose a strong password you don't use elsewhere.
+            </p>
+
+            <label className="settings-label">Current Password</label>
+            <div className="settings-password-wrapper">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                className="settings-input"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter current password"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="settings-eye-btn"
+                onClick={() => setShowCurrentPassword((p) => !p)}
+                aria-label={showCurrentPassword ? "Hide password" : "Show password"}
+              >
+                {showCurrentPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
+
+            <label className="settings-label">New Password</label>
+            <div className="settings-password-wrapper">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                className="settings-input"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="At least 6 characters, 1 letter, 1 number, 1 special"
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="settings-eye-btn"
+                onClick={() => setShowNewPassword((p) => !p)}
+                aria-label={showNewPassword ? "Hide password" : "Show password"}
+              >
+                {showNewPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
+
+            <label className="settings-label">Confirm New Password</label>
+            <div className="settings-password-wrapper">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                className="settings-input"
+                value={confirmNewPassword}
+                onChange={(e) => setConfirmNewPassword(e.target.value)}
+                placeholder="Re-enter new password"
+              />
+              <button
+                type="button"
+                className="settings-eye-btn"
+                onClick={() => setShowConfirmPassword((p) => !p)}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+              </button>
+            </div>
+
+            <button
+              className="settings-save-btn"
+              onClick={handleChangePassword}
+              disabled={savingPassword}
+            >
+              {savingPassword ? "Saving..." : "Change Password"}
+            </button>
+          </div>
         </div>
       </div>
     ) : activePage !== "Dashboard" ? (
