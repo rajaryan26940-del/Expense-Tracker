@@ -95,6 +95,16 @@ const [recurringType, setRecurringType] =
 const [editingBudget, setEditingBudget] = useState(false);
 
 const [budgetInput, setBudgetInput] = useState(monthlyBudget);
+
+const [categoryBudgets, setCategoryBudgets] = useState(() => {
+  const saved = localStorage.getItem("categoryBudgets");
+  return saved
+    ? JSON.parse(saved)
+    : { Food: 0, Travel: 0, Shopping: 0, Bills: 0, Others: 0 };
+});
+const [editingCategoryBudgets, setEditingCategoryBudgets] = useState(false);
+const [categoryBudgetInputs, setCategoryBudgetInputs] = useState(categoryBudgets);
+
  const [darkMode, setDarkMode] = useState(
   localStorage.getItem("darkMode") === "true");
   const [showForm, setShowForm] = useState(false);
@@ -398,6 +408,14 @@ const categoryColors = {
   Bills: "#DC3545",
   Others: "#6F42C1",
 };
+
+function getCategoryStatusColor(percentage) {
+  return percentage < 70
+    ? "#16a34a"
+    : percentage < 100
+    ? "#f59e0b"
+    : "#ef4444";
+}
 
 const allExpensesTotal = expenses.reduce(
   (sum, expense) => sum + Number(expense.amount),
@@ -1612,6 +1630,164 @@ function handleExportPDF() {
           handleEditIncome={handleEditIncome}
           handleDeleteIncome={handleDeleteIncome}
         />
+      </div>
+    ) : activePage === "Budget" ? (
+      <div className="category-budget-page">
+        <div className="income-page-header">
+          <div>
+            <h2>Budget</h2>
+            <p className="income-subtitle">
+              Set spending limits for each category and track your progress.
+            </p>
+          </div>
+
+          {!editingCategoryBudgets && (
+            <button
+              className="budget-edit-link-btn"
+              onClick={() => {
+                setCategoryBudgetInputs(categoryBudgets);
+                setEditingCategoryBudgets(true);
+              }}
+            >
+              <Pencil size={14} /> Edit Budgets
+            </button>
+          )}
+        </div>
+
+        {editingCategoryBudgets && (
+          <div className="category-budget-edit-card">
+            {["Food", "Travel", "Shopping", "Bills", "Others"].map((name) => (
+              <div className="category-budget-edit-row" key={name}>
+                <span className={`category-pill cat-${name.toLowerCase()}`}>
+                  {name}
+                </span>
+                <input
+                  type="number"
+                  className="budget-input"
+                  value={categoryBudgetInputs[name]}
+                  onChange={(e) =>
+                    setCategoryBudgetInputs({
+                      ...categoryBudgetInputs,
+                      [name]: e.target.value,
+                    })
+                  }
+                  placeholder="Enter budget"
+                />
+              </div>
+            ))}
+
+            <div className="category-budget-edit-actions">
+              <button
+                className="change-budget-btn"
+                onClick={() => {
+                  const cleaned = {};
+                  let hasInvalid = false;
+
+                  Object.entries(categoryBudgetInputs).forEach(([name, value]) => {
+                    const num = Number(value);
+                    if (isNaN(num) || num < 0) {
+                      hasInvalid = true;
+                    }
+                    cleaned[name] = isNaN(num) ? 0 : num;
+                  });
+
+                  if (hasInvalid) {
+                    toast.warning("Please enter valid budget amounts (0 or more).");
+                    return;
+                  }
+
+                  setCategoryBudgets(cleaned);
+                  localStorage.setItem("categoryBudgets", JSON.stringify(cleaned));
+                  setEditingCategoryBudgets(false);
+                  toast.success("Category budgets updated successfully!");
+                }}
+              >
+                Save Budgets
+              </button>
+
+              <button
+                className="change-budget-btn"
+                onClick={() => {
+                  const hasChanges = Object.keys(categoryBudgets).some(
+                    (name) =>
+                      Number(categoryBudgetInputs[name]) !== Number(categoryBudgets[name])
+                  );
+
+                  if (hasChanges) {
+                    openConfirm({
+                      title: "Discard Changes",
+                      message: "Are you sure you want to discard your changes to category budgets?",
+                      confirmText: "Discard",
+                      onConfirmAction: () => setEditingCategoryBudgets(false),
+                    });
+                    return;
+                  }
+
+                  setEditingCategoryBudgets(false);
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="category-budget-grid">
+          {categoryStats.map((cat) => {
+            const budget = categoryBudgets[cat.name] || 0;
+            const used =
+              budget > 0 ? Math.min((cat.total / budget) * 100, 100) : 0;
+            const statusColor = getCategoryStatusColor(used);
+            const remaining = budget - cat.total;
+
+            return (
+              <div className="category-budget-card" key={cat.name}>
+                <div className="category-budget-card-header">
+                  <span className={`category-pill cat-${cat.name.toLowerCase()}`}>
+                    {cat.name}
+                  </span>
+                  {budget > 0 && (
+                    <span
+                      className="category-budget-percent"
+                      style={{ color: statusColor }}
+                    >
+                      {used.toFixed(1)}%
+                    </span>
+                  )}
+                </div>
+
+                {budget > 0 ? (
+                  <>
+                    <p className="category-budget-amounts">
+                      ₹ {cat.total.toLocaleString("en-IN")} of ₹{" "}
+                      {budget.toLocaleString("en-IN")}
+                    </p>
+
+                    <div className="category-budget-bar">
+                      <div
+                        className="category-budget-bar-fill"
+                        style={{ width: `${used}%`, backgroundColor: statusColor }}
+                      ></div>
+                    </div>
+
+                    <p
+                      className="category-budget-remaining"
+                      style={{ color: remaining >= 0 ? "#16a34a" : "#dc2626" }}
+                    >
+                      {remaining >= 0
+                        ? `₹ ${remaining.toLocaleString("en-IN")} remaining`
+                        : `₹ ${Math.abs(remaining).toLocaleString("en-IN")} over budget`}
+                    </p>
+                  </>
+                ) : (
+                  <p className="category-budget-not-set">
+                    No budget set for this category yet.
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
     ) : activePage === "Categories" ? (
       <div className="categories-page">
