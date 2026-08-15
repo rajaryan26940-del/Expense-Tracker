@@ -529,6 +529,72 @@ Object.entries(dailyTotals).forEach(
     }
   }
 );
+
+// ---------- Analytics computations ----------
+
+const weekdayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const dayOfWeekTotals = weekdayNames.map((day) => ({ day, total: 0 }));
+
+expenses.forEach((expense) => {
+  const expenseDate = new Date(expense.updatedAt || expense.createdAt);
+  dayOfWeekTotals[expenseDate.getDay()].total += Number(expense.amount);
+});
+
+const highestDayOfWeekTotal = Math.max(
+  ...dayOfWeekTotals.map((d) => d.total),
+  0
+);
+
+const monthlyTrend = [];
+
+for (let i = 5; i >= 0; i--) {
+  const targetDate = new Date(
+    currentDate.getFullYear(),
+    currentDate.getMonth() - i,
+    1
+  );
+  const targetMonth = targetDate.getMonth();
+  const targetYear = targetDate.getFullYear();
+
+  const monthExpenseTotal = expenses.reduce((total, expense) => {
+    const expenseDate = new Date(expense.updatedAt || expense.createdAt);
+    if (
+      expenseDate.getMonth() === targetMonth &&
+      expenseDate.getFullYear() === targetYear
+    ) {
+      return total + Number(expense.amount);
+    }
+    return total;
+  }, 0);
+
+  const monthIncomeTotal = incomeList.reduce((total, income) => {
+    const incomeDate = new Date(income.createdAt);
+    if (
+      incomeDate.getMonth() === targetMonth &&
+      incomeDate.getFullYear() === targetYear
+    ) {
+      return total + Number(income.amount);
+    }
+    return total;
+  }, 0);
+
+  monthlyTrend.push({
+    label: targetDate.toLocaleString("default", { month: "short" }),
+    expense: monthExpenseTotal,
+    income: monthIncomeTotal,
+  });
+}
+
+const highestMonthlyTrendValue = Math.max(
+  ...monthlyTrend.map((m) => Math.max(m.expense, m.income)),
+  0
+);
+
+const topExpenses = [...expenses]
+  .sort((a, b) => Number(b.amount) - Number(a.amount))
+  .slice(0, 5);
+
       function handleResetFilters() {
   setSearch("");
   setFilterCategory("All");
@@ -1789,7 +1855,109 @@ function handleExportPDF() {
           })}
         </div>
       </div>
+    ) : activePage === "Analytics" ? (
+      <div className="analytics-page">
+        <h2>Analytics</h2>
+        <p className="analytics-subtitle">
+          Deeper patterns in your spending and income.
+        </p>
+
+        <div className="analytics-row">
+          <div className="analytics-card">
+            <h3>Spending by Day of Week</h3>
+            <div className="analytics-bar-list">
+              {dayOfWeekTotals.map((d) => (
+                <div className="analytics-bar-row" key={d.day}>
+                  <span className="analytics-bar-label">{d.day}</span>
+                  <div className="analytics-bar-track">
+                    <div
+                      className="analytics-bar-fill"
+                      style={{
+                        width:
+                          highestDayOfWeekTotal > 0
+                            ? `${(d.total / highestDayOfWeekTotal) * 100}%`
+                            : "0%",
+                      }}
+                    ></div>
+                  </div>
+                  <span className="analytics-bar-value">
+                    ₹ {d.total.toLocaleString("en-IN")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="analytics-card">
+            <h3>Top 5 Biggest Expenses</h3>
+            {topExpenses.length === 0 ? (
+              <p className="analytics-empty">No expenses recorded yet.</p>
+            ) : (
+              <div className="analytics-top-list">
+                {topExpenses.map((expense, index) => (
+                  <div className="analytics-top-row" key={expense._id}>
+                    <span className="analytics-top-rank">#{index + 1}</span>
+                    <span className="analytics-top-title">{expense.title}</span>
+                    <span
+                      className={`category-pill cat-${expense.category?.toLowerCase()}`}
+                    >
+                      {expense.category}
+                    </span>
+                    <span className="analytics-top-amount">
+                      ₹ {Number(expense.amount).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="analytics-card analytics-trend-card">
+          <h3>Income vs Expense — Last 6 Months</h3>
+          <div className="analytics-trend-chart">
+            {monthlyTrend.map((m) => (
+              <div className="analytics-trend-col" key={m.label}>
+                <div className="analytics-trend-bars">
+                  <div
+                    className="analytics-trend-bar analytics-trend-income"
+                    style={{
+                      height:
+                        highestMonthlyTrendValue > 0
+                          ? `${(m.income / highestMonthlyTrendValue) * 100}%`
+                          : "0%",
+                    }}
+                    title={`Income: ₹ ${m.income.toLocaleString("en-IN")}`}
+                  ></div>
+                  <div
+                    className="analytics-trend-bar analytics-trend-expense"
+                    style={{
+                      height:
+                        highestMonthlyTrendValue > 0
+                          ? `${(m.expense / highestMonthlyTrendValue) * 100}%`
+                          : "0%",
+                    }}
+                    title={`Expense: ₹ ${m.expense.toLocaleString("en-IN")}`}
+                  ></div>
+                </div>
+                <span className="analytics-trend-label">{m.label}</span>
+              </div>
+            ))}
+          </div>
+          <div className="analytics-trend-legend">
+            <span className="analytics-legend-item">
+              <span className="analytics-legend-dot analytics-legend-income"></span>
+              Income
+            </span>
+            <span className="analytics-legend-item">
+              <span className="analytics-legend-dot analytics-legend-expense"></span>
+              Expense
+            </span>
+          </div>
+        </div>
+      </div>
     ) : activePage === "Categories" ? (
+
       <div className="categories-page">
         <h2>Categories</h2>
         <p className="categories-subtitle">
