@@ -1154,7 +1154,214 @@ function handleExportPDF() {
         </div>
       </div>
 
-    {activePage === "Reports" ? (
+    {activePage === "Expenses" ? (
+      <div className="expenses-page">
+        <div className="income-page-header">
+          <div>
+            <h2>Expenses</h2>
+            <p className="income-subtitle">
+              All your expenses, with search, filters, and export.
+            </p>
+          </div>
+
+          <div className="income-page-total">
+            <span>Total Expense</span>
+            <p style={{ color: "#dc2626" }}>₹ {totalExpense.toLocaleString("en-IN")}</p>
+          </div>
+        </div>
+
+        {showForm && activeForm === "expense" && (
+          <div ref={formRef}>
+            <ExpenseForm
+              expenseName={expenseName}
+              setExpenseName={setExpenseName}
+              amount={amount}
+              setAmount={setAmount}
+              category={category}
+              setCategory={setCategory}
+              receipt={receipt}
+              setReceipt={setReceipt}
+              isRecurring={isRecurring}
+              setIsRecurring={setIsRecurring}
+              recurringType={recurringType}
+              setRecurringType={setRecurringType}
+              handleSaveExpense={handleSaveExpense}
+              editId={editId}
+              handleCancelEdit={handleCancelEdit}
+              saving={saving}
+            />
+          </div>
+        )}
+
+        <div className="export-buttons">
+          <button onClick={handleExportExcel}>
+            📊 Export Excel
+          </button>
+
+          <button onClick={handleExportPDF}>
+            📄 Export PDF
+          </button>
+        </div>
+
+        <div className="filter-controls">
+          <input
+            type="text"
+            placeholder="Search expenses..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <button onClick={() => setSearch("")}>
+              Clear Search
+            </button>
+          )}
+          <select
+            value={filterCategory}
+            onChange={(e) => setFilterCategory(e.target.value)}
+          >
+            <option value="All">All Categories</option>
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Bills">Bills</option>
+            <option value="Others">Others</option>
+          </select>
+
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(e.target.value)}
+          >
+            <option value="All">All Months</option>
+            <option value="January">January</option>
+            <option value="February">February</option>
+            <option value="March">March</option>
+            <option value="April">April</option>
+            <option value="May">May</option>
+            <option value="June">June</option>
+            <option value="July">July</option>
+            <option value="August">August</option>
+            <option value="September">September</option>
+            <option value="October">October</option>
+            <option value="November">November</option>
+            <option value="December">December</option>
+          </select>
+
+          <select
+            value={sortOption}
+            onChange={(e) => setSortOption(e.target.value)}
+          >
+            <option value="latest">Latest</option>
+            <option value="highest">Highest Amount</option>
+            <option value="lowest">Lowest Amount</option>
+          </select>
+          {(search ||
+            filterCategory !== "All" ||
+            selectedMonth !== "All" ||
+            sortOption !== "latest") && (
+            <button onClick={handleResetFilters}>
+              Reset Filters
+            </button>
+          )}
+        </div>
+
+        <table className="dashboard-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Expense Name</th>
+              <th>Amount</th>
+              <th>Category</th>
+              <th>Receipt</th>
+              <th>Recurring</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {loading ? (
+              <tr>
+                <td colSpan="8">Loading expenses...</td>
+              </tr>
+            ) : filteredExpenses.length === 0 ? (
+              <tr>
+                <td colSpan="8">
+                  {expenses.length === 0
+                    ? "No expenses found."
+                    : "No matching expenses found."}
+                </td>
+              </tr>
+            ) : (
+              filteredExpenses.map((expense) => (
+                <tr key={expense._id}>
+                  <td>
+                    {new Date(
+                      expense.updatedAt || expense.createdAt
+                    ).toLocaleDateString()}
+                  </td>
+
+                  <td>
+                    {new Date(
+                      expense.updatedAt || expense.createdAt
+                    ).toLocaleTimeString()}
+                  </td>
+
+                  <td>{expense.title}</td>
+                  <td>₹ {expense.amount}</td>
+                  <td>
+                    <span className={`category-pill cat-${expense.category?.toLowerCase()}`}>
+                      {expense.category}
+                    </span>
+                  </td>
+
+                  <td>
+                    {expense.receipt ? (
+                      <a
+                        href={expense.receipt}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="view-receipt-btn"
+                      >
+                        📄 View
+                      </a>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
+                  <td>
+                    {expense.isRecurring ? (
+                      <span className="recurring-badge">
+                        🔁 {expense.recurringType}
+                      </span>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
+
+                  <td>
+                    <button
+                      className="edit-btn"
+                      onClick={() => handleEditExpense(expense)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDeleteExpense(expense._id)}
+                      disabled={deletingId === expense._id}
+                    >
+                      {deletingId === expense._id ? "Deleting..." : "Delete"}
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    ) : activePage === "Reports" ? (
       <div className="reports-page">
         <h2>Reports</h2>
         <p className="reports-subtitle">
@@ -1883,7 +2090,7 @@ function handleExportPDF() {
             <h2>Recent Expenses</h2>
             <button
               className="view-all-link"
-              onClick={() => fullExpenseListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })}
+              onClick={() => setActivePage("Expenses")}
             >
               View All
             </button>
@@ -1948,203 +2155,7 @@ function handleExportPDF() {
         </div>
       </div>
 
-      <h2 ref={fullExpenseListRef}>Full Expense List</h2>
-     <div className="export-buttons">
-  <button onClick={handleExportExcel}>
-    📊 Export Excel
-  </button>
-
-  <button onClick={handleExportPDF}>
-    📄 Export PDF
-  </button>
-</div>
-
-      <div className="filter-controls">
-        <input
-          type="text"
-          placeholder="Search expenses..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-{search && (
-  <button onClick={() => setSearch("")}>
-    Clear Search
-  </button>
-)}
-        <select
-          value={filterCategory}
-          onChange={(e) =>
-            setFilterCategory(e.target.value)
-          }
-        >
-          <option value="All">All Categories</option>
-          <option value="Food">Food</option>
-          <option value="Travel">Travel</option>
-          <option value="Shopping">Shopping</option>
-          <option value="Bills">Bills</option>
-          <option value="Others">Others</option>
-        </select>
-
-        <select
-          value={selectedMonth}
-          onChange={(e) =>
-            setSelectedMonth(e.target.value)
-          }
-        >
-          <option value="All">All Months</option>
-          <option value="January">January</option>
-          <option value="February">February</option>
-          <option value="March">March</option>
-          <option value="April">April</option>
-          <option value="May">May</option>
-          <option value="June">June</option>
-          <option value="July">July</option>
-          <option value="August">August</option>
-          <option value="September">September</option>
-          <option value="October">October</option>
-          <option value="November">November</option>
-          <option value="December">December</option>
-        </select>
-
-        <select
-          value={sortOption}
-          onChange={(e) =>
-            setSortOption(e.target.value)
-          }
-        >
-          <option value="latest">Latest</option>
-          <option value="highest">
-            Highest Amount
-          </option>
-          <option value="lowest">
-            Lowest Amount
-          </option>
-        </select>
-        {(search ||
-  filterCategory !== "All" ||
-  selectedMonth !== "All" ||
-  sortOption !== "latest") && (
-  <button onClick={handleResetFilters}>
-    Reset Filters
-  </button>
-)}
-      </div>
-
-      <br />
-      <br />
-
-      <table className="dashboard-table">
-        <thead>
-          <tr>
-            <th>Date</th>
-<th>Time</th>
-<th>Expense Name</th>
-<th>Amount</th>
-<th>Category</th>
-<th>Receipt</th>
-<th>Recurring</th>
-<th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {loading ? (
-            <tr>
-              <td colSpan="8">
-                Loading expenses...
-              </td>
-            </tr>
-          ) : filteredExpenses.length === 0 ? (
-            <tr>
-              <td colSpan="8">
-  {expenses.length === 0
-    ? "No expenses found."
-    : "No matching expenses found."}
-</td>
-            </tr>
-          ) : (
-            filteredExpenses.map((expense) => (
-              <tr key={expense._id}>
-                <td>
-                  {new Date(
-                    expense.updatedAt ||
-                      expense.createdAt
-                  ).toLocaleDateString()}
-                </td>
-
-                <td>
-                  {new Date(
-                    expense.updatedAt ||
-                      expense.createdAt
-                  ).toLocaleTimeString()}
-                </td>
-
-                <td>{expense.title}</td>
-                <td>₹ {expense.amount}</td>
-                <td>
-                  <span className={`category-pill cat-${expense.category?.toLowerCase()}`}>
-                    {expense.category}
-                  </span>
-                </td>
-
-<td>
-  {expense.receipt ? (
-    <a
-      href={expense.receipt}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="view-receipt-btn"
-    >
-      📄 View
-    </a>
-  ) : (
-    "-"
-  )}
-</td>
-
-<td>
-  {expense.isRecurring ? (
-    <span className="recurring-badge">
-      🔁 {expense.recurringType}
-    </span>
-  ) : (
-    "-"
-  )}
-</td>
-
-<td>
-                  <button
-                    className="edit-btn"
-                    onClick={() =>
-                      handleEditExpense(expense)
-                    }
-                  >
-                    Edit
-                  </button>
-
-                  <button
-  className="delete-btn"
-  onClick={() =>
-    handleDeleteExpense(expense._id)
-  }
-  disabled={deletingId === expense._id}
->
-  {deletingId === expense._id
-    ? "Deleting..."
-    : "Delete"}
-</button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
-
-<h2 className="total-expense">
-  Total Expense: ₹ {totalExpense}
-</h2>
-    </>
+      </>
     )}
            </main>
       </div>
