@@ -554,6 +554,51 @@ Object.entries(dailyTotals).forEach(
 
   closeAndReset();
 }
+function handleToggleIncomeForm() {
+  const closeAndReset = () => {
+    if (showForm && activeForm === "income") {
+      setIncomeTitle("");
+      setIncomeAmount("");
+      setIncomeSource("");
+      setIncomeEditId(null);
+      setShowForm(false);
+    } else {
+      setIncomeTitle("");
+      setIncomeAmount("");
+      setIncomeSource("");
+      setIncomeEditId(null);
+      setActiveForm("income");
+      setShowForm(true);
+    }
+  };
+
+  if (showForm && activeForm === "income" && incomeEditId) {
+    openConfirm({
+      title: "Close Editing",
+      message: "Are you sure you want to close editing?",
+      confirmText: "Close",
+      onConfirmAction: closeAndReset,
+    });
+    return;
+  }
+
+  if (
+    showForm &&
+    activeForm === "income" &&
+    !incomeEditId &&
+    (incomeTitle.trim() !== "" || String(incomeAmount).trim() !== "")
+  ) {
+    openConfirm({
+      title: "Discard Income",
+      message: "Are you sure you want to discard this income entry?",
+      confirmText: "Discard",
+      onConfirmAction: closeAndReset,
+    });
+    return;
+  }
+
+  closeAndReset();
+}
 
   async function handleSaveExpense() {
   if (expenseName.trim() === "") {
@@ -1139,16 +1184,42 @@ function handleExportPDF() {
         </p>
         <div className="action-buttons">
           {(activePage === "Dashboard" || activePage === "Expenses") && (
-            <button className="btn-primary" onClick={() => { setActiveForm("expense"); handleToggleForm(); }}>
+            <button
+              className="btn-primary"
+              onClick={() => {
+                const willOpen = !(showForm && activeForm === "expense");
+                setActiveForm("expense");
+                handleToggleForm();
+                if (willOpen) {
+                  setTimeout(() => {
+                    formRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 100);
+                }
+              }}
+            >
               + {showForm && activeForm === "expense" ? "Close Form" : "Add Expense"}
             </button>
           )}
           {(activePage === "Dashboard" || activePage === "Income") && (
-            <button className="btn-success" onClick={() => {
-              setIncomeTitle(""); setIncomeAmount(""); setIncomeSource("");
-              setIncomeEditId(null); setActiveForm("income"); setShowForm(true);
-            }}>
-              + Add Income
+            <button
+              className="btn-success"
+              onClick={() => {
+                const willOpen = !(showForm && activeForm === "income");
+                handleToggleIncomeForm();
+                if (willOpen) {
+                  setTimeout(() => {
+                    formRef.current?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                  }, 100);
+                }
+              }}
+            >
+              + {showForm && activeForm === "income" ? "Close Form" : "Add Income"}
             </button>
           )}
         </div>
