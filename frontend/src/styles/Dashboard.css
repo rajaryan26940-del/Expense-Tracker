@@ -2251,3 +2251,128 @@ input[type="password"]::-ms-clear {
 .analytics-legend-expense {
   background: #dc2626;
 }
+.avatar-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-preview {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #2563eb;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.avatar-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-upload-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar-choose-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: white;
+  color: #374151;
+}
+
+.avatar-choose-btn:hover {
+  background: #f3f4f6;
+}
+
+.dark-mode .avatar-choose-btn {
+  background: #333;
+  color: white;
+  border-color: #666;
+}
+
+.dark-mode .avatar-choose-btn:hover {
+  background: #3a3a3a;
+}
+
+.profile-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.crop-modal {
+  width: 90%;
+  max-width: 420px;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .crop-modal {
+  background: #2d2d2d;
+}
+
+.crop-container {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  background: #333;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.crop-zoom-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.dark-mode .crop-zoom-row {
+  color: #d1d5db;
+}
+
+.crop-zoom-row input[type="range"] {
+  flex: 1;
+}
+
+.crop-modal-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.crop-modal-actions button {
+  flex: none;
+  width: auto;
+  min-width: 100px;
+  padding: 10px 20px;
+  font-size: 14px;
+  margin: 0;
+}
+
+.crop-modal-actions {
+  align-items: center;
+}

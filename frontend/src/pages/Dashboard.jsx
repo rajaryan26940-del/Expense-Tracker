@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import "../styles/Dashboard.css";
 import ConfirmModal from "../components/ConfirmModal";
@@ -22,7 +22,9 @@ import {
   updateIncome,
   deleteIncome,
 } from "../services/incomeService";
-import { updateName, changePassword } from "../services/userService";
+import { updateName, changePassword, updateProfilePicture } from "../services/userService";
+import Cropper from "react-easy-crop";
+import { getCroppedImg } from "../utils/cropImage";
 import {
   LayoutDashboard,
   Receipt,
@@ -66,6 +68,17 @@ const [settingsName, setSettingsName] = useState(
   localStorage.getItem("name") || ""
 );
 const [savingName, setSavingName] = useState(false);
+
+const [profilePicture, setProfilePicture] = useState(
+  localStorage.getItem("profilePicture") || ""
+);
+const [avatarFile, setAvatarFile] = useState(null);
+const [avatarPreview, setAvatarPreview] = useState(null);
+const [savingAvatar, setSavingAvatar] = useState(false);
+const [showCropModal, setShowCropModal] = useState(false);
+const [crop, setCrop] = useState({ x: 0, y: 0 });
+const [zoom, setZoom] = useState(1);
+const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
 
 const [currentPassword, setCurrentPassword] = useState("");
 const [newPassword, setNewPassword] = useState("");
@@ -936,6 +949,63 @@ function handleEditIncome(income) {
     },
   });
 }
+function handleAvatarFileChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  setAvatarFile(file);
+  setAvatarPreview(URL.createObjectURL(file));
+  setCrop({ x: 0, y: 0 });
+  setZoom(1);
+  setCroppedAreaPixels(null);
+  setShowCropModal(true);
+}
+
+const onCropComplete = useCallback((_croppedArea, croppedAreaPixelsValue) => {
+  setCroppedAreaPixels(croppedAreaPixelsValue);
+}, []);
+
+function handleCancelCrop() {
+  setShowCropModal(false);
+  setAvatarFile(null);
+  setAvatarPreview(null);
+  setCrop({ x: 0, y: 0 });
+  setZoom(1);
+  setCroppedAreaPixels(null);
+}
+
+async function handleSaveCroppedAvatar() {
+  if (!avatarPreview || !croppedAreaPixels) {
+    toast.warning("Please adjust the crop area first");
+    return;
+  }
+
+  try {
+    setSavingAvatar(true);
+    const croppedBlob = await getCroppedImg(avatarPreview, croppedAreaPixels);
+    const croppedFile = new File([croppedBlob], "profile.jpg", {
+      type: "image/jpeg",
+    });
+
+    const data = await updateProfilePicture(croppedFile);
+
+    localStorage.setItem("profilePicture", data.profilePicture);
+    setProfilePicture(data.profilePicture);
+    setShowCropModal(false);
+    setAvatarFile(null);
+    setAvatarPreview(null);
+
+    toast.success("Profile picture updated successfully!");
+  } catch (error) {
+    console.log(error);
+    toast.error(
+      error.response?.data?.message || "Failed to update profile picture"
+    );
+  } finally {
+    setSavingAvatar(false);
+  }
+}
+
 async function handleUpdateName() {
   if (settingsName.trim() === "") {
     toast.warning("Please enter a name");
@@ -1172,9 +1242,13 @@ function handleExportPDF() {
 </nav>
 
 <div className="sidebar-bottom">
-  <div className="profile-card">
+  <div className="profile-card" onClick={() => setActivePage("Settings")}>
     <div className="profile-avatar">
-      {(localStorage.getItem("name") || "U").charAt(0).toUpperCase()}
+      {profilePicture ? (
+        <img src={profilePicture} alt="Profile" className="profile-avatar-img" />
+      ) : (
+        (localStorage.getItem("name") || "U").charAt(0).toUpperCase()
+      )}
     </div>
     <div className="profile-info">
       <p className="profile-name">{localStorage.getItem("name")}</p>
@@ -2008,6 +2082,35 @@ function handleExportPDF() {
 
         <div className="settings-grid">
           <div className="settings-card">
+            <h3>Profile Picture</h3>
+            <p className="settings-card-desc">
+              Upload a photo to personalize your account.
+            </p>
+
+            <div className="avatar-upload-row">
+              <div className="avatar-preview">
+                {profilePicture ? (
+                  <img src={profilePicture} alt="Profile" />
+                ) : (
+                  <span>{(localStorage.getItem("name") || "U").charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+
+              <div className="avatar-upload-actions">
+                <label className="avatar-choose-btn">
+                  Choose Image
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarFileChange}
+                    hidden
+                  />
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div className="settings-card">
             <h3>Edit Name</h3>
             <p className="settings-card-desc">
               Update the name shown across your dashboard.
@@ -2612,7 +2715,60 @@ function handleExportPDF() {
           </div>
         </div>
       )}
+      {showCropModal && (
+        <div className="modal-overlay" onClick={handleCancelCrop}>
+          <div className="crop-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="all-notifications-header">
+              <h2>Edit Profile Picture</h2>
+              <button
+                className="all-notifications-close"
+                onClick={handleCancelCrop}
+              >
+                ✕
+              </button>
+            </div>
 
+            <div className="crop-container">
+              <Cropper
+                image={avatarPreview}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                cropShape="round"
+                showGrid={false}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={onCropComplete}
+              />
+            </div>
+
+            <div className="crop-zoom-row">
+              <span>Zoom</span>
+              <input
+                type="range"
+                min={1}
+                max={3}
+                step={0.1}
+                value={zoom}
+                onChange={(e) => setZoom(Number(e.target.value))}
+              />
+            </div>
+
+            <div className="crop-modal-actions">
+              <button
+                className="settings-save-btn"
+                onClick={handleSaveCroppedAvatar}
+                disabled={savingAvatar}
+              >
+                {savingAvatar ? "Saving..." : "Save"}
+              </button>
+              <button className="change-budget-btn" onClick={handleCancelCrop}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <ConfirmModal
         isOpen={confirmState.isOpen}
         title={confirmState.title}

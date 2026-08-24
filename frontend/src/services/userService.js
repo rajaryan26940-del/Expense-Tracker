@@ -12,3 +12,11 @@ export const changePassword = async (currentPassword, newPassword) => {
   });
   return response.data;
 };
+
+export const updateProfilePicture = async (file) => {
+  const formData = new FormData();
+  formData.append("profilePicture", file);
+
+  const response = await API.put("/user/avatar", formData);
+  return response.data;
+};
