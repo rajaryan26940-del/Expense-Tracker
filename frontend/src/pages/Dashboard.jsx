@@ -182,6 +182,7 @@ const [categoryBudgetInputs, setCategoryBudgetInputs] = useState(categoryBudgets
   const [showAllNotifications, setShowAllNotifications] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+
   function handleNavClick(page) {
     setActivePage(page);
     setSidebarOpen(false);
@@ -1344,6 +1345,7 @@ function handleExportPDF() {
           <button className="header-icon-btn logout-icon-btn" onClick={handleLogout} aria-label="Logout">
             <LogOut size={18} />
           </button>
+          
         </div>
       </div>
 
