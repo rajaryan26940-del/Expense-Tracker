@@ -68,6 +68,9 @@ window.location.replace("/dashboard");
   {loading ? "Logging in..." : "Login"}
 </button>
       <p>
+  <Link to="/forgot-password">Forgot Password?</Link>
+</p>
+      <p>
   Don't have an account? <Link to="/register">Register</Link>
 </p>
     </div>
