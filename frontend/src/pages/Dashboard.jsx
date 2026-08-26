@@ -45,6 +45,7 @@ import {
   Pencil,
   Eye,
   EyeOff,
+  Menu,
 } from "lucide-react";
 function Dashboard() {
   const navigate = useNavigate();
@@ -179,6 +180,12 @@ const [categoryBudgetInputs, setCategoryBudgetInputs] = useState(categoryBudgets
   const previousBudgetPercentRef = useRef(null);
   const [activePage, setActivePage] = useState("Dashboard");
   const [showAllNotifications, setShowAllNotifications] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  function handleNavClick(page) {
+    setActivePage(page);
+    setSidebarOpen(false);
+  }
 
   const [confirmState, setConfirmState] = useState({
     isOpen: false,
@@ -1167,7 +1174,7 @@ function handleExportPDF() {
     }`}
   >
     <div className="dashboard-layout">
-      <aside className="dashboard-sidebar">
+      <aside className={`dashboard-sidebar ${sidebarOpen ? "sidebar-open" : ""}`}>
   <div className="sidebar-logo-row">
     <div className="sidebar-logo-icon">
       <LayoutDashboard size={18} />
@@ -1178,7 +1185,7 @@ function handleExportPDF() {
   <nav className="sidebar-menu">
   <button
     className={`sidebar-item ${activePage === "Dashboard" ? "active" : ""}`}
-    onClick={() => setActivePage("Dashboard")}
+    onClick={() => handleNavClick("Dashboard")}
   >
     <LayoutDashboard size={20} />
     <span>Dashboard</span>
@@ -1186,7 +1193,7 @@ function handleExportPDF() {
 
   <button
     className={`sidebar-item ${activePage === "Expenses" ? "active" : ""}`}
-    onClick={() => setActivePage("Expenses")}
+    onClick={() => handleNavClick("Expenses")}
   >
     <Receipt size={20} />
     <span>Expenses</span>
@@ -1194,7 +1201,7 @@ function handleExportPDF() {
 
   <button
     className={`sidebar-item ${activePage === "Income" ? "active" : ""}`}
-    onClick={() => setActivePage("Income")}
+    onClick={() => handleNavClick("Income")}
   >
     <IndianRupee size={20} />
     <span>Income</span>
@@ -1202,7 +1209,7 @@ function handleExportPDF() {
 
   <button
     className={`sidebar-item ${activePage === "Budget" ? "active" : ""}`}
-    onClick={() => setActivePage("Budget")}
+    onClick={() => handleNavClick("Budget")}
   >
     <PiggyBank size={20} />
     <span>Budget</span>
@@ -1210,7 +1217,7 @@ function handleExportPDF() {
 
   <button
     className={`sidebar-item ${activePage === "Analytics" ? "active" : ""}`}
-    onClick={() => setActivePage("Analytics")}
+    onClick={() => handleNavClick("Analytics")}
   >
     <BarChart3 size={20} />
     <span>Analytics</span>
@@ -1218,7 +1225,7 @@ function handleExportPDF() {
 
   <button
     className={`sidebar-item ${activePage === "Reports" ? "active" : ""}`}
-    onClick={() => setActivePage("Reports")}
+    onClick={() => handleNavClick("Reports")}
   >
     <FileText size={20} />
     <span>Reports</span>
@@ -1226,7 +1233,7 @@ function handleExportPDF() {
 
   <button
     className={`sidebar-item ${activePage === "Categories" ? "active" : ""}`}
-    onClick={() => setActivePage("Categories")}
+    onClick={() => handleNavClick("Categories")}
   >
     <FolderTree size={20} />
     <span>Categories</span>
@@ -1234,7 +1241,7 @@ function handleExportPDF() {
 
   <button
     className={`sidebar-item ${activePage === "Settings" ? "active" : ""}`}
-    onClick={() => setActivePage("Settings")}
+    onClick={() => handleNavClick("Settings")}
   >
     <Settings size={20} />
     <span>Settings</span>
@@ -1255,26 +1262,30 @@ function handleExportPDF() {
       <span className="profile-link">View Profile</span>
     </div>
   </div>
-
-  <div className="dark-mode-row">
-    <span>Dark Mode</span>
-    <label className="switch">
-      <input
-        type="checkbox"
-        checked={darkMode}
-        onChange={handleThemeToggle}
-      />
-      <span className="slider" />
-    </label>
-  </div>
 </div>
 </aside>
 
+      {sidebarOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => setSidebarOpen(false)}
+        ></div>
+      )}
+
       <main className="dashboard-main">
       <div className="top-header">
-        <div>
-          <h1 className="page-title">Expense Tracker Dashboard</h1>
-          <p className="page-subtitle">Track your income, expenses and budget in one place.</p>
+        <div className="top-header-left">
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open menu"
+          >
+            <Menu size={22} />
+          </button>
+          <div>
+            <h1 className="page-title">Expense Tracker Dashboard</h1>
+            <p className="page-subtitle">Track your income, expenses and budget in one place.</p>
+          </div>
         </div>
 
         <div className="header-actions">
@@ -1493,6 +1504,7 @@ function handleExportPDF() {
           )}
         </div>
 
+        <div className="table-scroll-wrapper">
         <table className="dashboard-table">
           <thead>
             <tr>
@@ -1589,6 +1601,7 @@ function handleExportPDF() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     ) : activePage === "Reports" ? (
       <div className="reports-page">
@@ -1765,11 +1778,13 @@ function handleExportPDF() {
           </select>
         </div>
 
+        <div className="table-scroll-wrapper">
         <IncomeTable
           incomeList={filteredIncomeList}
           handleEditIncome={handleEditIncome}
           handleDeleteIncome={handleDeleteIncome}
         />
+        </div>
       </div>
     ) : activePage === "Budget" ? (
       <div className="category-budget-page">
@@ -2596,11 +2611,13 @@ function handleExportPDF() {
               View All
             </button>
           </div>
+          <div className="table-scroll-wrapper">
           <IncomeTable
             incomeList={incomeList.slice(0, 5)}
             handleEditIncome={handleEditIncome}
             handleDeleteIncome={handleDeleteIncome}
           />
+          </div>
         </div>
 
         <div className="recent-col">
@@ -2613,6 +2630,7 @@ function handleExportPDF() {
               View All
             </button>
           </div>
+          <div className="table-scroll-wrapper">
           <table className="dashboard-table recent-table">
             <thead>
               <tr>
@@ -2670,6 +2688,7 @@ function handleExportPDF() {
               )}
             </tbody>
           </table>
+          </div>
         </div>
       </div>
 
