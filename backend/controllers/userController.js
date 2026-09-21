@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
+const cloudinary = require("../config/cloudinary");
 
 const updateName = async (req, res) => {
   try {
@@ -81,4 +82,37 @@ const changePassword = async (req, res) => {
   }
 };
 
-module.exports = { updateName, changePassword };
+const updateProfilePicture = async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "Please select an image to upload",
+      });
+    }
+
+    const uploadedImage = await cloudinary.uploader.upload(
+      `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`,
+      {
+        folder: "profile-pictures",
+      }
+    );
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { profilePicture: uploadedImage.secure_url },
+      { new: true }
+    ).select("-password");
+
+    res.status(200).json({
+      message: "Profile picture updated successfully",
+      profilePicture: updatedUser.profilePicture,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+};
+
+module.exports = { updateName, changePassword, updateProfilePicture };
