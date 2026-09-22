@@ -1,4 +1,3 @@
-
 html, body {
   overflow-x: hidden;
   max-width: 100%;
@@ -2447,24 +2446,10 @@ input[type="password"]::-ms-clear {
     min-width: 500px;
   }
 
-  .recent-col {
-  width: 0;
-  min-width: 0;
-}
-
-.table-scroll-wrapper {
-  width: 100%;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.recent-table {
-  table-layout: auto;
-  min-width: 480px;
-  width: max-content;
-}
+  .recent-table {
+    table-layout: auto;
+    min-width: 480px;
+  }
 
   .recent-table td,
   .recent-table th {
