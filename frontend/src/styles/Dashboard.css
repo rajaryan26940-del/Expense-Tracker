@@ -454,10 +454,15 @@ button:active {
 
   height: 100vh;
   overflow-y: auto;
-  overflow-x: hidden;
 
   padding: 30px 40px;
   box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .dashboard-main {
+    overflow-x: hidden;
+  }
 }
 
 .sidebar-logo {
@@ -2415,6 +2420,7 @@ input[type="password"]::-ms-clear {
 .table-scroll-wrapper {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (max-width: 768px) {
