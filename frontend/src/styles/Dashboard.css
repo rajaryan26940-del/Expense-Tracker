@@ -1,4 +1,8 @@
-.dashboard-container {
+
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}.dashboard-container {
   width: 100%;
    min-height: 100vh;
   margin: 0;
@@ -450,6 +454,7 @@ button:active {
 
   height: 100vh;
   overflow-y: auto;
+  overflow-x: hidden;
 
   padding: 30px 40px;
   box-sizing: border-box;
@@ -2415,6 +2420,17 @@ input[type="password"]::-ms-clear {
 @media (max-width: 768px) {
   .mobile-menu-btn {
     display: flex;
+  }
+
+  .dashboard-bottom-row,
+  .recent-row {
+    min-width: 0;
+  }
+
+  .expense-chart-wrapper,
+  .budget-section,
+  .recent-col {
+    min-width: 0;
   }
 
   .expense-chart-wrapper {
